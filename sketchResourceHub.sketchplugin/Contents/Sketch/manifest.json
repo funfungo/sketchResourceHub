@@ -1,0 +1,31 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "commands": [
+    {
+      "name": "my-command",
+      "identifier": "sketchresourcehub.my-command-identifier",
+      "script": "my-command.js",
+      "shortcut": "command shift 0",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    }
+  ],
+  "menu": {
+    "title": "sketchresourcehub",
+    "items": [
+      "sketchresourcehub.my-command-identifier"
+    ]
+  },
+  "version": "0.1.0",
+  "name": "sketchResourceHub",
+  "identifier": "sketchResourceHub",
+  "disableCocoaScriptPreprocessor": true,
+  "appcast": "https://raw.githubusercontent.com//master/.appcast.xml",
+  "author": "nikkifang",
+  "authorEmail": "nikkifang@tencent.com"
+}
