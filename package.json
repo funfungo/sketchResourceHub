@@ -1,13 +1,13 @@
 {
-  "name": "sketchResourceHub",
-  "version": "0.1.0",
+  "name": "MiaoW",
+  "version": "0.0.1",
   "engines": {
     "sketch": ">=3.0"
   },
   "skpm": {
-    "name": "sketchResourceHub",
+    "name": "MiaoW",
     "manifest": "src/manifest.json",
-    "main": "sketchResourceHub.sketchplugin",
+    "main": "MiaoW.sketchplugin",
     "assets": [
       "assets/**/*"
     ],
@@ -32,5 +32,5 @@
   "dependencies": {
     "sketch-module-web-view": "^3.0.1"
   },
-  "author": "nikkifang <nikkifang@tencent.com>"
+  "author": "nikkifang doubleluo"
 }

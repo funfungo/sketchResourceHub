@@ -1,12 +1,24 @@
 {
-  "compatibleVersion": 3,
-  "bundleVersion": 1,
+  "version": "0.0.1",
+  "appcast": "https://wximg.qq.com/tmt/sketch/appcast.xml",
   "commands": [
     {
-      "name": "my-command",
-      "identifier": "sketchresourcehub.my-command-identifier",
-	  "script": "./my-command.js",
-	  "shortcut": "command shift 0",
+      "name": "上传图标",
+      "identifier": "miaow.my-UploadIcon-identifier",
+  	  "script": "./UploadIcon.js",
+  	  "shortcut": "command shift 9",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    },
+    {
+      "name": "图标库",
+      "identifier": "miaow.my-IconList-identifier",
+      "script": "./IconList.js",
+      "shortcut": "command shift 0",
       "handlers": {
         "run": "onRun",
         "actions": {
@@ -16,9 +28,11 @@
     }
   ],
   "menu": {
-    "title": "sketchresourcehub",
+    "title": "MiaoW",
     "items": [
-      "sketchresourcehub.my-command-identifier"
+      "miaow.my-UploadIcon-identifier",
+      "miaow.my-IconList-identifier"
+
     ]
   }
 }
