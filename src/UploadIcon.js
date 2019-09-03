@@ -3,63 +3,70 @@ import * as fs from '@skpm/fs';
 import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
 import UI from 'sketch/ui';
+import sketch from 'sketch';
+
 
 const webviewIdentifier = 'sketchresourcehub.webview';
 const document = context.document;
 const selection = context.selection;
-let layer;
+var layer;
 
 export default function() {
+  if(selection.length == 0 || selection.length > 1){
+    return UI.message('请选择一个 Icon 上传');
+  }else if(selection.length == 1){
+    UI.message('加载中...');
+  }
   layer = selection[0];
 
-  let svgString = exportLayerAsBitmap(document, layer);
-  console.log(svgString);
-  console.log(typeof svgString);
-  let exportFormat = {
-    svg: svgString
-  }
+  let exportFormat = exportLayerAsBitmap(document, layer);
 
   const options = {
+    parent: sketch.getSelectedDocument(),
+    modal: true,
     identifier: webviewIdentifier,
-    width: 900,
-    height: 600,
-    show: false
+    width: 600,
+    height: 460,
+    show: false,
+    frame: false,
+    titleBarStyle: 'hiddenInset',
+    minimizable: false,
+    maximizable: false
   };
 
   const browserWindow = new BrowserWindow(options);
 
-  // only show the window when the page has loaded to avoid a white flash
   browserWindow.once('ready-to-show', () => {
     browserWindow.show();
   });
 
   const webContents = browserWindow.webContents;
-
-  // print a message when the page loads
   webContents.on('did-finish-load', () => {
-    UI.message('UI loaded!');
+    // UI.message('UI loaded!');
   });
 
-  // add a handler for a call from web content's javascript
-  webContents.on('nativeLog', s => {
-    UI.message(s);
+
+  webContents.on('showSvg', s => {
     webContents
-      .executeJavaScript(`setRandomNumber(${JSON.stringify(exportFormat)})`)
+      .executeJavaScript(`showSvg(${JSON.stringify(exportFormat)})`)
       .catch(console.error);
   });
 
-  browserWindow.loadURL(require('../resources/webview.html'));
+  webContents.on('closeWindow', s => {
+    browserWindow.close();
+  });
+
+
+  browserWindow.loadURL('https://wedesign.oa.com/UploadIcon?sketch=1');
 }
 
 function exportLayerAsBitmap(document, layer) {
   let slice,
-    result = {},
     rect = layer.absoluteRect(),
     path = NSTemporaryDirectory() + layer.objectID() + '.svg';
 
   NSMakeRect(rect.x(), rect.y(), rect.width(), rect.height());
-  result.width = rect.width();
-  result.height = rect.height();
+
   slice = MSExportRequest.exportRequestsFromExportableLayer(
     layer
   ).firstObject();
@@ -68,12 +75,16 @@ function exportLayerAsBitmap(document, layer) {
   slice.setShouldTrim(false);
   slice.setSaveForWeb(1);
   document.saveArtboardOrSlice_toFile(slice, path);
+  let ret = {
+    IconContent: encodeURIComponent(String(fs.readFileSync(path, 'utf8'))),
+    IconName: encodeURIComponent(layer.name()),
+    Width: rect.width(),
+    Height: rect.height()
+  }
 
-  return String(fs.readFileSync(path, 'utf8'));
+  return ret;
 }
 
-// When the plugin is shutdown by Sketch (for example when the user disable the plugin)
-// we need to close the webview if it's open
 export function onShutdown() {
   const existingWebview = getWebview(webviewIdentifier);
   if (existingWebview) {
