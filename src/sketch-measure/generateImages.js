@@ -23,7 +23,7 @@ export function generatePreviewImages(file, dest, scale) {
     return promisedExec(`${sketchtool}`, [
       'export',
       'artboards',
-      '/Users/nikkifang/GZ/sketch-measure-cli/assets/demo.sketch',
+      file,
       `--output=${dest}`,
       `--formats=png`,
       '--use-id-for-name=YES',

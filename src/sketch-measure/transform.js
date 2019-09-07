@@ -597,7 +597,6 @@ class Transformer {
     const pagesAndArtboards = this.meta.pagesAndArtboards
     const pages = this.pages
     const result = this.result
-    console.log(this);
     const symbols = this.getAllSymbols()
     const textStyles = this.getAllTextStyles()
     Object.keys(pagesAndArtboards).forEach(k => {

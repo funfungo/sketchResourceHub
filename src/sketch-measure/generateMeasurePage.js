@@ -21,8 +21,7 @@ function copy (src, dest) {
   // if(fileManager.fileExistsAtPath)
   fileManager.copyItemAtPath_toPath_error(src, dest, err);
   if (err.value() !== null) {
-    //TODO log error info
-    console.log("copy fail");
+    console.log(String(err.value()));
   }
 }
 
@@ -41,6 +40,7 @@ function copyAssets (dest) {
 
 let INDEX_HTML
 function generateIndexHtml (data, dest) {
+  let err = MOPointer.alloc().init();
   if (!INDEX_HTML) {
     INDEX_HTML = fs.readFileSync(path.join(context.plugin.urlForResourceNamed("template").path(), 'index.html'), {
       encoding: 'utf8'
@@ -48,7 +48,11 @@ function generateIndexHtml (data, dest) {
   }
   const html = INDEX_HTML.replace(/__data__/, JSON.stringify(data, null, 2))
   const nsHtml = NSMutableString.stringWithString(html);
-  nsHtml.writeToFile_atomically_encoding_error(path.join(dest,'index.html'), true, 'utf8', null);
+  console.log(dest);
+  nsHtml.writeToFile_atomically_encoding_error(path.join(dest,'index.html'), true, NSUTF8StringEncoding, err);
+  if (err.value() !== null) {
+    console.log(String(err.value()));
+  }
 }
 
 export function generatePage (data, dest) {
