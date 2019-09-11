@@ -4,6 +4,7 @@ import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
 import UI from 'sketch/ui';
 import sketch from 'sketch';
+import * as util from './util';
 
 
 const webviewIdentifier = 'sketchresourcehub.webview';
@@ -13,22 +14,26 @@ export default function() {
   var Document = require('sketch/dom').Document;
   var SketchName = '';
   if(document.path == undefined){
-    SketchName = '未命名.sketch';
+    SketchName = '未命名';
   }else{
-    SketchName = decodeURIComponent(document.path.substr(document.path.lastIndexOf('/')+1))
+    SketchName = decodeURIComponent(document.path.substr(document.path.lastIndexOf('/')+1)).replace('.sketch','');
   }
+  var basePath = '/tmp/' + SketchName + '/';
+  var zipUrl = basePath.substr(0,basePath.length-1) + '.zip';
+
   const options = {
     parent: sketch.getSelectedDocument(),
     modal: true,
     identifier: webviewIdentifier,
     width: 600,
-    height: 460,
+    height: 530,
     show: false,
     frame: false,
     titleBarStyle: 'hiddenInset',
     minimizable: false,
     maximizable: false
   };
+
 
   const browserWindow = new BrowserWindow(options);
 
@@ -38,23 +43,36 @@ export default function() {
 
   const webContents = browserWindow.webContents;
   webContents.on('did-finish-load', () => {
-    document.save('/tmp/' + SketchName,{
-      saveMode: Document.SaveMode.SaveTo
-    }, err => {
+    var obj = {
+      SketchName: encodeURIComponent(SketchName)
+    };
 
-      var file = NSData.alloc().initWithContentsOfFile('/tmp/' + SketchName);
-      var SketchContent = file.base64EncodedStringWithOptions(0) + '';
-      var obj = {
-        SketchName: encodeURIComponent(SketchName),
-        SketchContent: SketchContent 
-      };
+    util.mkdirpSync(basePath);
+    util.mkdirpSync(basePath + 'sketch/');
+    util.saveSketchFile(basePath + 'sketch/' + SketchName + '.sketch',() => {
+      var symbols = util.findSymbolMaster(context);
+      util.mkdirpSync(basePath + 'symbolpng');
+      util.mkdirpSync(basePath + 'symbolsvg');
+      symbols.forEach((symbol,item) => {
+        util.captureLayerImage(context, symbol, basePath + 'symbolpng/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.png');
+        util.captureLayerImage(context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.svg', 'svg');
+      })
+      util.zip([zipUrl,basePath.substr(0,basePath.length-1)]);
 
       webContents
-      .executeJavaScript(`SketchFile(${JSON.stringify(obj)})`)
+      .executeJavaScript(`sketchName(${JSON.stringify(obj)})`)
       .catch(console.error);
-    })
+    });
     
   });
+
+  webContents.on('sketchUpload', s => {
+    var data = util.encodeBase64(zipUrl);
+    webContents
+    .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
+    .catch(console.error);
+  });
+
 
   webContents.on('closeWindow', s => {
     NSFileManager.defaultManager().removeItemAtPath_error('/tmp/' + SketchName,nil)
