@@ -674,7 +674,6 @@ class Transformer {
         );
       });
     });
-
     return result;
   }
   isSymbol(layer) {

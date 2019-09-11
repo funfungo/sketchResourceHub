@@ -42,6 +42,12 @@ export function toPercentage(num, precision) {
 }
 
 const slugRe = /(\s+|\/+)/g;
+/**
+ * format layerName by connect pageName and artboardName by '-'
+ * @param  {Object} pageName       layer
+ * @param  {Object} artboardName      result data
+ * @return {String}              layers should append
+ */
 export function getSlug(pageName, artboardName) {
   if (
     !pageName ||
