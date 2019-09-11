@@ -12,7 +12,7 @@ let layer;
 
 // 图标库
 export default function() {
-  UI.message('加载中...');
+  UI.message('加载中');
   const options = {
     identifier: webviewIdentifier,
     width: 900,
@@ -85,10 +85,11 @@ export default function() {
   });
 
   browserWindow.on('blur', () => {
-    browserWindow.close();
+    // browserWindow.close();
   });
-
-  browserWindow.loadURL('https://wedesign.oa.com/IconList?sketch=1');
+  var url = 'https://wedesign.oa.com/IconList?sketch=1';
+  log(url);
+  browserWindow.loadURL(url);
 }
 
 /**

@@ -3456,7 +3456,7 @@ var selection = context.selection;
 var layer; // 图标库
 
 /* harmony default export */ __webpack_exports__["default"] = (function () {
-  sketch_ui__WEBPACK_IMPORTED_MODULE_3___default.a.message('加载中...');
+  sketch_ui__WEBPACK_IMPORTED_MODULE_3___default.a.message('加载中');
   var options = {
     identifier: webviewIdentifier,
     width: 900,
@@ -3500,10 +3500,11 @@ var layer; // 图标库
   webContents.on('close', function () {
     browserWindow.close();
   });
-  browserWindow.on('blur', function () {
-    browserWindow.close();
+  browserWindow.on('blur', function () {// browserWindow.close();
   });
-  browserWindow.loadURL('https://wedesign.oa.com/IconList?sketch=1');
+  var url = 'https://wedesign.oa.com/IconList?sketch=1';
+  log(url);
+  browserWindow.loadURL(url);
 });
 /**
 * @name getViewBox
