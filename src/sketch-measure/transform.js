@@ -398,7 +398,7 @@ function transformCSSRadius(radius) {
 }
 
 function transformCSSBorder(border) {
-  if (border.length) {
+  if (border && border.length) {
     const { thickness, color } = border[0];
 
     return `border: ${thickness}px solid ${transformCSSColor(color)};`;
@@ -406,7 +406,7 @@ function transformCSSBorder(border) {
 }
 
 function transformCSSBackground(fills) {
-  if (fills.length) {
+  if (fills && fills.length) {
     const { color } = fills[0];
 
     return `background: ${transformCSSColor(color)};`;
@@ -414,7 +414,7 @@ function transformCSSBackground(fills) {
 }
 
 function transformCSSShadow(shadows) {
-  if (shadows.length) {
+  if (shadows && shadows.length) {
     const { offsetX, offsetY, blurRadius, color } = shadows[0];
 
     return `box-shadow: ${offsetX}px ${offsetY}px ${blurRadius}px ${transformCSSColor(
@@ -430,7 +430,7 @@ function transformCSSOpacity(opacity) {
 }
 
 function transformRNBackground(fills) {
-  if (fills.length) {
+  if (fills && fills.length) {
     const { color } = fills[0];
 
     return `backgroundColor: '${transformCSSColor(color)}',`;
@@ -438,7 +438,7 @@ function transformRNBackground(fills) {
 }
 
 function transformRNBorder(border) {
-  if (border.length) {
+  if (border && border.length) {
     const { thickness, color } = border[0];
 
     return [
@@ -456,7 +456,7 @@ function transformRNRadius(radius) {
 }
 
 function transformRNShadow(shadows) {
-  if (shadows.length) {
+  if (shadows && shadows.length) {
     const { offsetX, offsetY, blurRadius, color } = shadows[0];
     let _shadowColor = color["color-hex"].split(" ")[0];
     let _shadowOpacity = color.a;

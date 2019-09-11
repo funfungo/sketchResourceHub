@@ -15,15 +15,18 @@ function parseText (layer) {
 class TextStyle {
   constructor (layer) {
     this.layer = layer
-    this.textStyle = layer.style.textStyle
-
-    this.encodeAttr = layer.style.textStyle.encodedAttributes
+    this.textStyle = layer.style.textStyle || []
+    if(layer.style.textStyle){
+      this.encodeAttr = layer.style.textStyle.encodedAttributes;
+    }else{
+      console.log(layer);
+    }
   }
 
   _getStyle () {
-    const fontSize = this.encodeAttr.MSAttributedStringFontAttribute.attributes.size
-    const fontFace = this.encodeAttr.MSAttributedStringFontAttribute.attributes.name
-    const paragraphStyle = this.encodeAttr.paragraphStyle || {}
+    const fontSize = this.encodeAttr ? this.encodeAttr.MSAttributedStringFontAttribute.attributes.size : 14
+    const fontFace = this.encodeAttr ? this.encodeAttr.MSAttributedStringFontAttribute.attributes.name : 'undefined'
+    const paragraphStyle = this.encodeAttr ? this.encodeAttr.paragraphStyle : {}
 
     // Default to left
     let textAlign = 'left'
@@ -48,12 +51,12 @@ class TextStyle {
     let lineHeight = paragraphStyle.maximumLineHeight
 
     const style = {
-      color: this.encodeAttr.MSAttributedStringColorAttribute,
+      color: this.encodeAttr ? this.encodeAttr.MSAttributedStringColorAttribute : {},
       fontSize,
       fontFace,
       textAlign,
       lineHeight: lineHeight || 1.4 * fontSize,
-      letterSpacing: this.encodeAttr.kerning == null ? 0 : this.encodeAttr.kerning
+      letterSpacing: this.encodeAttr ? this.encodeAttr.kerning == null ? 0 : this.encodeAttr.kerning : 0
     }
 
     return style
