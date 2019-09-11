@@ -1,10 +1,10 @@
-import sketch from 'sketch';
-const { promisedExec } = require('./utils');
-var dataDocument = require('sketch/dom').getSelectedDocument();
+import sketch from "sketch";
+const { promisedExec } = require("./utils");
+var dataDocument = require("sketch/dom").getSelectedDocument();
 
 // sketchtool path
 const sketchtool =
-  '/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool';
+  "/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool";
 
 const RE_IMG = /Exported\s([^\n]+)@2x.png\n?/g;
 
@@ -19,17 +19,17 @@ function getFilesFromMsg(msg) {
 }
 
 export function generatePreviewImages(file, dest, scale) {
-  return promisedExec(`${sketchtool}`, ['-v']).then(() => {
+  return promisedExec(`${sketchtool}`, ["-v"]).then(() => {
     return promisedExec(`${sketchtool}`, [
-      'export',
-      'artboards',
+      "export",
+      "artboards",
       file,
       `--output=${dest}`,
       `--formats=png`,
-      '--use-id-for-name=YES',
-      '--scales=2'
+      "--use-id-for-name=YES",
+      "--scales=2"
     ]).then(msg => {
-      return getFilesFromMsg(msg)
+      return getFilesFromMsg(msg);
     });
   });
 }
@@ -39,7 +39,7 @@ export function generateSliceImages(file, dest, scale) {
     return promisedExec(
       `${sketchtool} export slices ${escape(file)} --output=${escape(
         dest
-      )} --format='png' --scales='${scale || '2.0'}'`
+      )} --format='png' --scales='${scale || "2.0"}'`
     ).then(msg => {
       return getFilesFromMsg(msg);
     });
@@ -47,7 +47,7 @@ export function generateSliceImages(file, dest, scale) {
 }
 
 export function rename(src, dest) {
-  return promisedExec('mv', [src, dest]);
+  return promisedExec("mv", [src, dest]);
 }
 
 function escape(url) {
