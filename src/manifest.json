@@ -1,6 +1,5 @@
 {
   "version": "0.0.1",
-  "appcast": "https://wximg.qq.com/tmt/sketch/appcast.xml",
   "commands": [
     {
       "name": "上传图标",

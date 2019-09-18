@@ -10344,7 +10344,7 @@ var webviewIdentifier = 'sketchresourcehub.webview';
     NSFileManager.defaultManager().removeItemAtPath_error('/tmp/' + SketchName, nil);
     browserWindow.close();
   });
-  browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://http://wedesign.oa.com/UploadSketch?sketch=1');
 });
 function onShutdown() {
   var existingWebview = Object(sketch_module_web_view_remote__WEBPACK_IMPORTED_MODULE_2__["getWebview"])(webviewIdentifier);

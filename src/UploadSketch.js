@@ -87,7 +87,7 @@ export default function() {
   });
 
 
-  browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://http://wedesign.oa.com/UploadSketch?sketch=1');
 }
 
 export function onShutdown() {
