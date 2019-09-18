@@ -24,12 +24,14 @@ class TextStyle {
   }
 
   _getStyle () {
+    this.encodeAttr = this.encodeAttr ? this.encodeAttr : {};
     const fontSize = this.encodeAttr ? this.encodeAttr.MSAttributedStringFontAttribute.attributes.size : 14
     const fontFace = this.encodeAttr ? this.encodeAttr.MSAttributedStringFontAttribute.attributes.name : 'undefined'
-    const paragraphStyle = this.encodeAttr ? this.encodeAttr.paragraphStyle : {}
+    const paragraphStyle = this.encodeAttr.paragraphStyle ? this.encodeAttr.paragraphStyle : {}
 
     // Default to left
     let textAlign = 'left'
+
     switch (paragraphStyle.alignment) {
       case 1: {
         textAlign = 'left'
@@ -48,6 +50,7 @@ class TextStyle {
         break
       }
     }
+
     let lineHeight = paragraphStyle.maximumLineHeight
 
     const style = {

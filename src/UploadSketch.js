@@ -66,7 +66,7 @@ export default function() {
       .executeJavaScript(`sketchName(${JSON.stringify(obj)})`)
       .catch(console.error);
     });
-    
+
   });
 
   webContents.on('sketchUpload', s => {
@@ -77,7 +77,7 @@ export default function() {
       .catch(console.error);
     });
 
-    
+
   });
 
 
@@ -87,7 +87,7 @@ export default function() {
   });
 
 
-  browserWindow.loadURL('http://http://wedesign.oa.com/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://wedesign.oa.com/UploadSketch?sketch=1');
 }
 
 export function onShutdown() {
