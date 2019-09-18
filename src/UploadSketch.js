@@ -5,6 +5,7 @@ import { getWebview } from 'sketch-module-web-view/remote';
 import UI from 'sketch/ui';
 import sketch from 'sketch';
 import * as util from './util';
+import { generateHtml } from './GenerateHtml';
 
 
 const webviewIdentifier = 'sketchresourcehub.webview';
@@ -49,7 +50,9 @@ export default function() {
 
     util.mkdirpSync(basePath);
     util.mkdirpSync(basePath + 'sketch/');
-    util.saveSketchFile(basePath + 'sketch/' + SketchName + '.sketch',() => {
+    util.mkdirpSync(basePath + 'html/');
+    var sketchFileUrl = basePath + 'sketch/' + SketchName + '.sketch';
+    util.saveSketchFile(sketchFileUrl ,() => {
       var symbols = util.findSymbolMaster(context);
       util.mkdirpSync(basePath + 'symbolpng');
       util.mkdirpSync(basePath + 'symbolsvg');
@@ -57,7 +60,7 @@ export default function() {
         util.captureLayerImage(context, symbol, basePath + 'symbolpng/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.png');
         util.captureLayerImage(context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.svg', 'svg');
       })
-      util.zip([zipUrl,basePath.substr(0,basePath.length-1)]);
+      generateHtml(sketchFileUrl,basePath + 'html/');
 
       webContents
       .executeJavaScript(`sketchName(${JSON.stringify(obj)})`)
@@ -67,10 +70,14 @@ export default function() {
   });
 
   webContents.on('sketchUpload', s => {
-    var data = util.encodeBase64(zipUrl);
-    webContents
-    .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
-    .catch(console.error);
+    util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
+      var data = util.encodeBase64(zipUrl);
+      webContents
+      .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
+      .catch(console.error);
+    });
+
+    
   });
 
 

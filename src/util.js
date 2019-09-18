@@ -1,3 +1,7 @@
+import child_process from '@skpm/child_process'; // ⚠️ The version 0.4.* requires Sketch 54 or above
+import * as fs from '@skpm/fs';
+import path from '@skpm/path';
+
 export function getLibraries() {
   let libraries = Array.from(NSApp.delegate().librariesController().libraries())
   .filter(lib => !!lib.locationOnDisk() && !!lib.enabled() && !!lib.libraryID())
@@ -104,6 +108,27 @@ export function saveSketchFile(filePath,func) {
   }, ()=> {
     func();
   })
+}
+
+export function zipSketch(args) {
+  return new Promise((resolve, reject) => {
+    const task = child_process.spawn('zip', [
+      '-q',
+      '-r',
+      '-m',
+      args[0],
+      args[1]
+    ]);
+    task.stdout.on('data', data => {
+      console.log(`stdout: ${data}`);
+    });
+    task.stderr.on('data', data => {
+      console.error(`stderr: ${data}`);
+    });
+    task.on('close', resolve);
+    task.on('exit', resolve);
+    task.on('error', reject);
+  });
 }
 
 // zip(['-q','-r','-m','-o','-j','/Users/liuxinyu/Desktop/123.zip','/Users/liuxinyu/Desktop/123'])

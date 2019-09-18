@@ -4,15 +4,15 @@ import BrowserWindow from 'sketch-module-web-view';
 import { getWebview } from 'sketch-module-web-view/remote';
 import UI from 'sketch/ui';
 import sketch from 'sketch';
-
 const webviewIdentifier = 'sketchresourcehub.webview';
 const document = context.document;
 const selection = context.selection;
 let layer;
 
+
 // 图标库
 export default function() {
-  UI.message('加载中');
+  UI.message('加载中...');
   const options = {
     identifier: webviewIdentifier,
     width: 900,

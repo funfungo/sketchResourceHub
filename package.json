@@ -21,8 +21,10 @@
   },
   "devDependencies": {
     "@skpm/builder": "^0.5.11",
+    "@skpm/child_process": "^0.4.1",
     "@skpm/extract-loader": "^2.0.2",
-    "@skpm/fs": "^0.2.4",
+    "@skpm/fs": "^0.2.5",
+    "@skpm/path": "^0.1.4",
     "css-loader": "^1.0.0",
     "html-loader": "^0.5.1"
   },
