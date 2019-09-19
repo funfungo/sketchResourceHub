@@ -53,8 +53,6 @@ export default function() {
   });
 
   webContents.on('sketchUpload', s => {
-    
-
     util.mkdirpSync(basePath);
     util.mkdirpSync(basePath + 'sketch/');
     util.mkdirpSync(basePath + 'html/');
@@ -68,19 +66,16 @@ export default function() {
         util.captureLayerImage(context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.svg', 'svg');
       })
       generateHtml(sketchFileUrl,basePath + 'html/');
-
       util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
         var data = util.encodeBase64(zipUrl);
         webContents
         .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
         .catch(console.error);
       });
-
+      webContents
+      .executeJavaScript(`sketchName(${JSON.stringify(obj)})`)
+      .catch(console.error);
     });
-
-    
-
-    
   });
 
 
@@ -88,7 +83,6 @@ export default function() {
     NSFileManager.defaultManager().removeItemAtPath_error('/tmp/' + SketchName,nil)
     browserWindow.close();
   });
-
 
   browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
 }
