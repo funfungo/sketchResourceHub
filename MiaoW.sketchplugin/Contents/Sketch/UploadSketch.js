@@ -10316,6 +10316,9 @@ var webviewIdentifier = 'sketchresourcehub.webview';
     var obj = {
       SketchName: encodeURIComponent(SketchName)
     };
+    webContents.executeJavaScript("sketchName(".concat(JSON.stringify(obj), ")")).catch(console.error);
+  });
+  webContents.on('sketchUpload', function (s) {
     _util__WEBPACK_IMPORTED_MODULE_5__["mkdirpSync"](basePath);
     _util__WEBPACK_IMPORTED_MODULE_5__["mkdirpSync"](basePath + 'sketch/');
     _util__WEBPACK_IMPORTED_MODULE_5__["mkdirpSync"](basePath + 'html/');
@@ -10329,22 +10332,19 @@ var webviewIdentifier = 'sketchresourcehub.webview';
         _util__WEBPACK_IMPORTED_MODULE_5__["captureLayerImage"](context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig, '_') + '-----' + symbol.objectID() + '.svg', 'svg');
       });
       Object(_GenerateHtml__WEBPACK_IMPORTED_MODULE_6__["generateHtml"])(sketchFileUrl, basePath + 'html/');
-      webContents.executeJavaScript("sketchName(".concat(JSON.stringify(obj), ")")).catch(console.error);
-    });
-  });
-  webContents.on('sketchUpload', function (s) {
-    _util__WEBPACK_IMPORTED_MODULE_5__["zipSketch"]([zipUrl, basePath.substr(0, basePath.length - 1)]).then(function () {
-      var data = _util__WEBPACK_IMPORTED_MODULE_5__["encodeBase64"](zipUrl);
-      webContents.executeJavaScript("callSketchUpload(".concat(JSON.stringify({
-        SketchContent: data
-      }), ")")).catch(console.error);
+      _util__WEBPACK_IMPORTED_MODULE_5__["zipSketch"]([zipUrl, basePath.substr(0, basePath.length - 1)]).then(function () {
+        var data = _util__WEBPACK_IMPORTED_MODULE_5__["encodeBase64"](zipUrl);
+        webContents.executeJavaScript("callSketchUpload(".concat(JSON.stringify({
+          SketchContent: data
+        }), ")")).catch(console.error);
+      });
     });
   });
   webContents.on('closeWindow', function (s) {
     NSFileManager.defaultManager().removeItemAtPath_error('/tmp/' + SketchName, nil);
     browserWindow.close();
   });
-  browserWindow.loadURL('http://http://wedesign.oa.com/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
 });
 function onShutdown() {
   var existingWebview = Object(sketch_module_web_view_remote__WEBPACK_IMPORTED_MODULE_2__["getWebview"])(webviewIdentifier);

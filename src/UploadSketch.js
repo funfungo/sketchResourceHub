@@ -47,6 +47,13 @@ export default function() {
     var obj = {
       SketchName: encodeURIComponent(SketchName)
     };
+    webContents
+      .executeJavaScript(`sketchName(${JSON.stringify(obj)})`)
+      .catch(console.error);
+  });
+
+  webContents.on('sketchUpload', s => {
+    
 
     util.mkdirpSync(basePath);
     util.mkdirpSync(basePath + 'sketch/');
@@ -62,20 +69,16 @@ export default function() {
       })
       generateHtml(sketchFileUrl,basePath + 'html/');
 
-      webContents
-      .executeJavaScript(`sketchName(${JSON.stringify(obj)})`)
-      .catch(console.error);
-    });
-    
-  });
+      util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
+        var data = util.encodeBase64(zipUrl);
+        webContents
+        .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
+        .catch(console.error);
+      });
 
-  webContents.on('sketchUpload', s => {
-    util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
-      var data = util.encodeBase64(zipUrl);
-      webContents
-      .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
-      .catch(console.error);
     });
+
+    
 
     
   });
@@ -87,7 +90,7 @@ export default function() {
   });
 
 
-  browserWindow.loadURL('http://http://wedesign.oa.com/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
 }
 
 export function onShutdown() {
