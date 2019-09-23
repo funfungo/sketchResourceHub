@@ -38,6 +38,18 @@
       }
     },
     {
+      "name": "UIKit",
+      "identifier": "miaow.my-UIKit-identifier",
+      "script": "./UIKit.js",
+      "shortcut": "command shift 8",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    },
+    {
       "name": "同步 Symbol",
       "identifier": "miaow.my-SyncSketch-identifier",
       "script": "./SyncSketch.js",
@@ -56,6 +68,7 @@
       "miaow.my-UploadIcon-identifier",
       "miaow.my-IconList-identifier",
       "miaow.my-UploadSketch-identifier",
+      "miaow.my-UIKit-identifier",
       "miaow.my-SyncSketch-identifier"
     ]
   }

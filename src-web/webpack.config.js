@@ -12,7 +12,7 @@ module.exports = {
   entry: entries,
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, '../resources')
+    path: path.resolve(__dirname, '../assets')
   },
   module: {
     rules: [
@@ -37,7 +37,10 @@ module.exports = {
   },
   plugins: [
     new VueLoaderPlugin()
-  ].concat(htmlPlugins)
+  ].concat(htmlPlugins),
+  node: {
+    setImmediate: false
+  }
 };
 
 
@@ -54,10 +57,11 @@ function getEntries(path) {
 
 function generateHtmlPlugins(entries){
   return Object.keys(entries).map((page) => {
+    console.log(page);
     return new HtmlWebpackPlugin({
       filename: `${page}.html`,
       template: page + '.html',
-      inject: true,
+      chunks: [page],
     })
   })
 }

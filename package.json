@@ -14,10 +14,11 @@
     "sketch-assets-file": "sketch-assets/icons.sketch"
   },
   "scripts": {
-    "build": "skpm-build",
+    "build": "./skpm-build-web.js",
     "watch": "skpm-build --watch",
     "start": "skpm-build --watch",
-    "postinstall": "npm run build && skpm-link"
+    "postinstall": "npm run build && skpm-link",
+    "watch-web": "./skpm-build-web.js --watch"
   },
   "devDependencies": {
     "@skpm/builder": "^0.5.11",
