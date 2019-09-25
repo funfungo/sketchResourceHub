@@ -18,7 +18,7 @@ export function generateHtml(filePath,tmpPath) {
   const NAME_MAP = {};
   let transformer;
   // unzip current sketch file task tmpPath
-  parseSketchFile(filePath, tmpPath).then(data => {
+  return parseSketchFile(filePath, tmpPath).then(data => {
     transformer = new Transformer(data.meta, data.pages, {
       savePath: tmpPath,
       // Don't export symbol artboard.
