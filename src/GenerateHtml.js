@@ -34,18 +34,6 @@ export function generateHtml(filePath,tmpPath) {
       NAME_MAP[artboard.objectID] = artboard.slug;
     });
     generatePage(processedData, tmpPath);
-    generatePreviewImages(filePath, path.join(tmpPath, 'dist', 'preview')).then(
-      images => {
-        return Promise.all(
-          images.map(name => {
-            const correctName = NAME_MAP[name];
-            return rename(
-              path.join(tmpPath, `dist/preview/${name}@2x.png`),
-              path.join(tmpPath, `dist/preview/${correctName}.png`)
-            );
-          })
-        );
-      }
-    );
+    return generatePreviewImages(filePath, path.join(tmpPath, 'dist', 'preview'));
   });
 }
