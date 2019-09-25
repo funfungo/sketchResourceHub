@@ -65,16 +65,15 @@ export default function() {
         util.captureLayerImage(context, symbol, basePath + 'symbolpng/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.png');
         util.captureLayerImage(context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.svg', 'svg');
       })
-      generateHtml(sketchFileUrl,basePath + 'html/');
-      util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
-        var data = util.encodeBase64(zipUrl);
-        webContents
-        .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
-        .catch(console.error);
+      generateHtml(sketchFileUrl,basePath + 'html/').then(()=>{
+        util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
+          var data = util.encodeBase64(zipUrl);
+          webContents
+          .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
+          .catch(console.error);
+        });
       });
-      webContents
-      .executeJavaScript(`sketchName(${JSON.stringify(obj)})`)
-      .catch(console.error);
+      
     });
   });
 

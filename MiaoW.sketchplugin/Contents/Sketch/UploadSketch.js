@@ -10222,7 +10222,7 @@ function generateHtml(filePath, tmpPath) {
   var NAME_MAP = {};
   var transformer; // unzip current sketch file task tmpPath
 
-  Object(_sketch_measure_parseSketchFile__WEBPACK_IMPORTED_MODULE_2__["parseSketchFile"])(filePath, tmpPath).then(function (data) {
+  return Object(_sketch_measure_parseSketchFile__WEBPACK_IMPORTED_MODULE_2__["parseSketchFile"])(filePath, tmpPath).then(function (data) {
     transformer = new _sketch_measure_transform__WEBPACK_IMPORTED_MODULE_3__["Transformer"](data.meta, data.pages, {
       savePath: tmpPath,
       // Don't export symbol artboard.
@@ -10238,7 +10238,7 @@ function generateHtml(filePath, tmpPath) {
       NAME_MAP[artboard.objectID] = artboard.slug;
     });
     Object(_sketch_measure_generateMeasurePage__WEBPACK_IMPORTED_MODULE_4__["generatePage"])(processedData, tmpPath);
-    Object(_sketch_measure_generateImages__WEBPACK_IMPORTED_MODULE_5__["generatePreviewImages"])(filePath, _skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, 'dist', 'preview')).then(function (images) {
+    return Object(_sketch_measure_generateImages__WEBPACK_IMPORTED_MODULE_5__["generatePreviewImages"])(filePath, _skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, 'dist', 'preview')).then(function (images) {
       return Promise.all(images.map(function (name) {
         var correctName = NAME_MAP[name];
         return Object(_sketch_measure_generateImages__WEBPACK_IMPORTED_MODULE_5__["rename"])(_skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, "dist/preview/".concat(name, "@2x.png")), _skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, "dist/preview/".concat(correctName, ".png")));
@@ -10331,12 +10331,13 @@ var webviewIdentifier = 'sketchresourcehub.webview';
         _util__WEBPACK_IMPORTED_MODULE_5__["captureLayerImage"](context, symbol, basePath + 'symbolpng/' + symbol.name().replace(/\//ig, '_') + '-----' + symbol.objectID() + '.png');
         _util__WEBPACK_IMPORTED_MODULE_5__["captureLayerImage"](context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig, '_') + '-----' + symbol.objectID() + '.svg', 'svg');
       });
-      Object(_GenerateHtml__WEBPACK_IMPORTED_MODULE_6__["generateHtml"])(sketchFileUrl, basePath + 'html/');
-      _util__WEBPACK_IMPORTED_MODULE_5__["zipSketch"]([zipUrl, basePath.substr(0, basePath.length - 1)]).then(function () {
-        var data = _util__WEBPACK_IMPORTED_MODULE_5__["encodeBase64"](zipUrl);
-        webContents.executeJavaScript("callSketchUpload(".concat(JSON.stringify({
-          SketchContent: data
-        }), ")")).catch(console.error);
+      Object(_GenerateHtml__WEBPACK_IMPORTED_MODULE_6__["generateHtml"])(sketchFileUrl, basePath + 'html/').then(function () {
+        _util__WEBPACK_IMPORTED_MODULE_5__["zipSketch"]([zipUrl, basePath.substr(0, basePath.length - 1)]).then(function () {
+          var data = _util__WEBPACK_IMPORTED_MODULE_5__["encodeBase64"](zipUrl);
+          webContents.executeJavaScript("callSketchUpload(".concat(JSON.stringify({
+            SketchContent: data
+          }), ")")).catch(console.error);
+        });
       });
     });
   });
@@ -10915,7 +10916,7 @@ var _require = __webpack_require__(/*! ./utils */ "./src/sketch-measure/utils.js
 var dataDocument = __webpack_require__(/*! sketch/dom */ "sketch/dom").getSelectedDocument(); // sketchtool path
 
 
-var sketchtool = "/Applications/Sketch.app/Contents/Resources/sketchtool/bin/sketchtool";
+var sketchtool = String(NSBundle.mainBundle().bundlePath()) + '/Contents/Resources/sketchtool/bin/sketchtool';
 var RE_IMG = /Exported\s([^\n]+)@2x.png\n?/g; // We should prevent to duplicate image with save name.
 
 function getFilesFromMsg(msg) {
@@ -11355,9 +11356,10 @@ function () {
   _createClass(TextStyle, [{
     key: "_getStyle",
     value: function _getStyle() {
+      this.encodeAttr = this.encodeAttr ? this.encodeAttr : {};
       var fontSize = this.encodeAttr ? this.encodeAttr.MSAttributedStringFontAttribute.attributes.size : 14;
       var fontFace = this.encodeAttr ? this.encodeAttr.MSAttributedStringFontAttribute.attributes.name : 'undefined';
-      var paragraphStyle = this.encodeAttr ? this.encodeAttr.paragraphStyle : {}; // Default to left
+      var paragraphStyle = this.encodeAttr.paragraphStyle ? this.encodeAttr.paragraphStyle : {}; // Default to left
 
       var textAlign = 'left';
 
