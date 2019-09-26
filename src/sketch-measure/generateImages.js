@@ -4,7 +4,8 @@ var dataDocument = require("sketch/dom").getSelectedDocument();
 
 // sketchtool path
 const sketchtool =
-  String(NSBundle.mainBundle().bundlePath()) + '/Contents/Resources/sketchtool/bin/sketchtool';
+  String(NSBundle.mainBundle().bundlePath()) +
+  "/Contents/Resources/sketchtool/bin/sketchtool";
 
 const RE_IMG = /Exported\s([^\n]+)@2x.png\n?/g;
 

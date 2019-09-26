@@ -10200,7 +10200,7 @@ module.exports = g;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(Promise) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generateHtml", function() { return generateHtml; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generateHtml", function() { return generateHtml; });
 /* harmony import */ var _skpm_fs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @skpm/fs */ "./node_modules/@skpm/fs/index.js");
 /* harmony import */ var _skpm_fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_skpm_fs__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _skpm_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @skpm/path */ "./node_modules/@skpm/path/index.js");
@@ -10238,15 +10238,9 @@ function generateHtml(filePath, tmpPath) {
       NAME_MAP[artboard.objectID] = artboard.slug;
     });
     Object(_sketch_measure_generateMeasurePage__WEBPACK_IMPORTED_MODULE_4__["generatePage"])(processedData, tmpPath);
-    return Object(_sketch_measure_generateImages__WEBPACK_IMPORTED_MODULE_5__["generatePreviewImages"])(filePath, _skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, 'dist', 'preview')).then(function (images) {
-      return Promise.all(images.map(function (name) {
-        var correctName = NAME_MAP[name];
-        return Object(_sketch_measure_generateImages__WEBPACK_IMPORTED_MODULE_5__["rename"])(_skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, "dist/preview/".concat(name, "@2x.png")), _skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, "dist/preview/".concat(correctName, ".png")));
-      }));
-    });
+    return Object(_sketch_measure_generateImages__WEBPACK_IMPORTED_MODULE_5__["generatePreviewImages"])(filePath, _skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, 'dist', 'preview'));
   });
 }
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/promise-polyfill/lib/index.js */ "./node_modules/promise-polyfill/lib/index.js")))
 
 /***/ }),
 
