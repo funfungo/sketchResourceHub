@@ -9,6 +9,7 @@ const entries = getEntries('./pages/**/index.js')
 const htmlPlugins = generateHtmlPlugins(entries);
 
 module.exports = {
+  mode: process.env.NODE_ENV || 'development',
   entry: entries,
   output: {
     filename: '[name].js',

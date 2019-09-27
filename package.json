@@ -23,9 +23,11 @@
   "devDependencies": {
     "@skpm/builder": "^0.5.11",
     "@skpm/child_process": "^0.4.1",
+    "@skpm/events": "^0.2.0",
     "@skpm/extract-loader": "^2.0.2",
     "@skpm/fs": "^0.2.5",
     "@skpm/path": "^0.1.4",
+    "babel-polyfill": "^6.26.0",
     "css-loader": "^1.0.0",
     "html-loader": "^0.5.1"
   },
