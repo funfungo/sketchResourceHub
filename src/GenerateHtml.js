@@ -35,5 +35,16 @@ export function generateHtml(filePath,tmpPath) {
     });
     generatePage(processedData, tmpPath);
     return generatePreviewImages(filePath, path.join(tmpPath, 'dist', 'preview'));
+  }).then((images) => {
+    let promises = [];
+    for( let image of images){
+      const correctName = NAME_MAP[image];
+      let task = rename(
+        path.join(tmpPath, `dist/preview/${image}@2x.png`),
+        path.join(tmpPath, `dist/preview/${correctName}.png`)
+      );
+      promises.push(task);
+    }
+    return Promise.all(promises);
   });
 }

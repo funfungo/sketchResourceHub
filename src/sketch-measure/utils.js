@@ -78,5 +78,8 @@ export function promisedExec(cmd, options) {
     task.stderr.on('data', data => {
       reject(`stderr: ${data}`);
     });
+    task.on('close', (data)=>{
+      resolve(`stdout: ${data}`);
+    })
   });
 }
