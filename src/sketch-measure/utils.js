@@ -73,13 +73,12 @@ export function promisedExec(cmd, options) {
   return new Promise((resolve, reject) => {
     let task = spawn(cmd, options);
     task.stdout.on('data', data => {
-      resolve(`stdout: ${data}`);
+      console.log(`stdout: ${data}`);
     });
     task.stderr.on('data', data => {
-      reject(`stderr: ${data}`);
+      console.log(`stdout: ${data}`);
     });
-    task.on('close', (data)=>{
-      resolve(`stdout: ${data}`);
-    })
+    task.on('close', resolve);
+    task.on('error', reject);
   });
 }
