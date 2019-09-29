@@ -14,6 +14,7 @@
                 :src="devWeb ? requestLayerImageUrl(section) : 'file://' + section.imagePath"
                 :width="section.width"
                 :height="section.height"
+                @mousedown="dragSymbol(section)"
               />
             </div>
           </div>
@@ -38,12 +39,13 @@ export default {
         name: mockData.libraries.name || ""
       },
       libraries: mockData.libraries,
-      progress: 0
+      progress: 0,
+      currentSymbol: {}
     };
   },
   mounted() {
     console.log(window.location);
-    this.devWeb = window.location.protocol === 'http:' ? true : false;
+    this.devWeb = window.location.protocol === "http:" ? true : false;
     let _this = this;
     window.receiveData = function(data) {
       _this.libraries = JSON.parse(JSON.stringify(data)).libraries;
@@ -63,6 +65,15 @@ export default {
       window.postMessage("loadKit", "receiveData", "progress");
     },
     processData(symbols) {},
+    dragSymbol(section) {
+      // rect = {
+      //   x: rect.left,
+      //   y: rect.top,
+      //   width: rect.right - rect.left,
+      //   height: rect.bottom - rect.top
+      // };
+      window.postMessage("startDragging",section);
+    },
 
     requestLayerImageUrl(symbol) {
       let canvas = document.createElement("canvas");
