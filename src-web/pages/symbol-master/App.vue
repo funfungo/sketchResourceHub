@@ -28,7 +28,7 @@ import mockData from "../../mock.json";
 export default {
   data() {
     return {
-      devWeb: false,
+      devWeb: true,
       loading: true,
       info: {
         archiveVersion: mockData.libraries.archiveVersion || 0,
