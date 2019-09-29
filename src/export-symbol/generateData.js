@@ -13,12 +13,11 @@ export async function generateData({onProgress}) {
   let libraries = findLib();
   let progressReporter = new ProgressReporter();
   progressReporter.on('progress', progress => {
-    console.log(progress);
     onProgress(progress);
   });
   let childProgressReporters = progressReporter.makeChildren(libraries.length);
   let compositeIndex = {libraries : []};
-  for( let lib of libraries){
+  for( let [i,lib] of libraries.entries()){
     let fileHash = String(
       NSFileManager.defaultManager()
         .contentsAtPath(lib.sketchFilePath)
@@ -46,7 +45,7 @@ export async function generateData({onProgress}) {
       let doc = util.loadDocFromSketchFile(lib.sketchFilePath);
       doc.setFileURL(NSURL.fileURLWithPath(lib.sketchFilePath));
 
-      libraryIndex = await buildSymbolIndexFormLibrary(lib.libraryId, lib.name, doc);
+      libraryIndex = await buildSymbolIndexFormLibrary(lib.libraryId, lib.name, doc, childProgressReporters[i]);
       // cache the index
       util.mkdirpSync(path.dirname(indexCachePath));
       fs.writeFileSync(indexCachePath,
@@ -66,10 +65,10 @@ async function buildSymbolIndexFormLibrary(libraryId, defaultLibName, document, 
   let cachePath = path.join(util.getPluginCachePath(), libraryId);
   console.log(cachePath);
   let allLayers = util.getAllSymbolLayers(document);
-  // progressReporter.total = allLayers.length;
+  progressReporter.total = allLayers.length;
   // allTextLayers.reverse();
   for( let layer of allLayers){
-    // progressReporter.increment();
+    progressReporter.increment();
     let parsedName = parseLayerName(String(layer.name()));
     let layerId = String(layer.objectID());
     let id = libraryId + "." + layerId;
@@ -128,6 +127,7 @@ function findLib() {
       }
       return firstWithId;
     });
+    console.log(typeof libraries);
   return libraries;
 }
 

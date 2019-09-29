@@ -151,8 +151,9 @@ class UIKit {
     this.webContents.on("loadKit", (callbackName, progressCallbackName) => {
       console.time("test");
       generateData({
-        onProgress: progress =>
+        onProgress: progress =>{
           this.runWebCallback(progressCallbackName, progress)
+        }
       }).then(index => {
         this.runWebCallback(callbackName, index);
         console.timeEnd("test");
@@ -160,39 +161,6 @@ class UIKit {
         console.log(e);
       });
     });
-
-    this.webContents.on(
-      "loadStickerIndex",
-      (callbackName, progressCallbackName) => {
-        // trigger the creation of the st
-        makeStickerIndexForLibraries({
-          onProgress: progress =>
-            this.runWebCallback(progressCallbackName, progress)
-        })
-          .then(stickerIndex => {
-            stickerIndex.libraries.forEach(libraryIndex => {
-              libraryIndex.colorsAvailable =
-                libraryIndex.colors && libraryIndex.colors.length;
-              if (
-                MSArchiveHeader.metadataForNewHeader().build >=
-                BUILD_SKETCH_53_BETA_1
-              ) {
-                // no need to do this in Sketch 53
-                libraryIndex.colorsAvailable = false;
-              }
-              if (libraryIndex.colorsAvailable) {
-                libraryIndex.colorsAdded = colorUtil.areAllLibraryColorsInDocument(
-                  libraryIndex.colors,
-                  this.context.document
-                );
-              }
-              libraryIndexesById[libraryIndex.id] = libraryIndex;
-            });
-            this.runWebCallback(callbackName, stickerIndex);
-          })
-          .catch(e => log(e.message));
-      }
-    );
 
     this.webContents.on("openUrl", url => {
       NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
