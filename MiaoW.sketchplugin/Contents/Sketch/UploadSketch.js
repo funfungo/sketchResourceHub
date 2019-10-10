@@ -10200,7 +10200,7 @@ module.exports = g;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generateHtml", function() { return generateHtml; });
+/* WEBPACK VAR INJECTION */(function(Promise) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generateHtml", function() { return generateHtml; });
 /* harmony import */ var _skpm_fs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @skpm/fs */ "./node_modules/@skpm/fs/index.js");
 /* harmony import */ var _skpm_fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_skpm_fs__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _skpm_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @skpm/path */ "./node_modules/@skpm/path/index.js");
@@ -10239,8 +10239,38 @@ function generateHtml(filePath, tmpPath) {
     });
     Object(_sketch_measure_generateMeasurePage__WEBPACK_IMPORTED_MODULE_4__["generatePage"])(processedData, tmpPath);
     return Object(_sketch_measure_generateImages__WEBPACK_IMPORTED_MODULE_5__["generatePreviewImages"])(filePath, _skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, 'dist', 'preview'));
+  }).then(function (images) {
+    var promises = [];
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = images[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var image = _step.value;
+        var correctName = NAME_MAP[image];
+        var task = Object(_sketch_measure_generateImages__WEBPACK_IMPORTED_MODULE_5__["rename"])(_skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, "dist/preview/".concat(image, "@2x.png")), _skpm_path__WEBPACK_IMPORTED_MODULE_1___default.a.join(tmpPath, "dist/preview/".concat(correctName, ".png")));
+        promises.push(task);
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return != null) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    return Promise.all(promises);
   });
 }
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/promise-polyfill/lib/index.js */ "./node_modules/promise-polyfill/lib/index.js")))
 
 /***/ }),
 
@@ -10910,7 +10940,7 @@ var _require = __webpack_require__(/*! ./utils */ "./src/sketch-measure/utils.js
 var dataDocument = __webpack_require__(/*! sketch/dom */ "sketch/dom").getSelectedDocument(); // sketchtool path
 
 
-var sketchtool = String(NSBundle.mainBundle().bundlePath()) + '/Contents/Resources/sketchtool/bin/sketchtool';
+var sketchtool = String(NSBundle.mainBundle().bundlePath()) + "/Contents/Resources/sketchtool/bin/sketchtool";
 var RE_IMG = /Exported\s([^\n]+)@2x.png\n?/g; // We should prevent to duplicate image with save name.
 
 function getFilesFromMsg(msg) {
@@ -12221,6 +12251,9 @@ function promisedExec(cmd, options) {
     });
     task.stderr.on('data', function (data) {
       reject("stderr: ".concat(data));
+    });
+    task.on('close', function (data) {
+      resolve("stdout: ".concat(data));
     });
   });
 }
