@@ -3,19 +3,49 @@
     <div class="loading" v-if="loading">
       <div>{{progress}}</div>
     </div>
-    <div class="symbol__container">
-      <div class="symbol__library">
-        <div class="symbol__library-item" v-for="(lib,i) in libraries" :key="lib.id">
-          {{lib.name}}
-          <div class="symbol__sections">
-            <div class="symbol__section" v-for="(section,j) in libraries[i].sections" :key="j">
-              {{section.name}}
-              <img
-                :src="devWeb ? requestLayerImageUrl(section) : 'file://' + section.imagePath"
-                :width="section.width"
-                :height="section.height"
-                @mousedown="dragSymbol(section)"
-              />
+    <div class="symbol__container" else>
+      <div class="symbol__search">搜索</div>
+      <div class="symbol__main">
+        <div class="symbol__menu">
+          <div class="symbol__menu-section">
+            <div
+              class="symbol__menu-title"
+              v-for="(lib, i) in libraries"
+              :key="lib.id"
+              @click="changeLibrary(i)"
+            >{{lib.name}}</div>
+          </div>
+          <div class="symbol__menu-head">
+            <ul>
+              <li
+                class="symbol__menu-item"
+                v-for="(list, key) of libraries[currentLibrary].menu"
+                :key="key"
+              >
+                <div class="symbol__menu-item-title">{{key}}</div>
+                <ul class="symbol__submenu">
+                  <li
+                    v-for="(sublist, subkey) of list"
+                    :key="subkey"
+                    @click="changeSection(key + '_' + subkey)"
+                  >{{subkey}}</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="symbol__list">
+          <div class="symbol__list-item" v-for="(list, key) of libraries[currentLibrary].menu" :key="key">
+            <div class="symbol__sublist-container" v-for="(sublist, subkey) of list" :key="subkey" :id="key + '_' + subkey">
+              <div v-for="item in sublist" :key="item.id" class="symbol__item">
+                <div class="symbol__item-title">{{item.name}}</div>
+                <img
+                  :src="devWeb ? requestLayerImageUrl(item) : 'file://' + item.imagePath"
+                  :width="item.width"
+                  :height="item.height"
+                  @mousedown="dragSymbol(item)"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -30,7 +60,7 @@ export default {
   data() {
     return {
       devWeb: true,
-      loading: true,
+      loading: false,
       info: {
         archiveVersion: mockData.libraries.archiveVersion || 0,
         fileHash: mockData.libraries.fileHash || "0",
@@ -40,6 +70,8 @@ export default {
       },
       libraries: {},
       progress: 0,
+      currentLibrary: 0,
+      currentSection: "",
       currentSymbol: {},
       menu: []
     };
@@ -72,16 +104,14 @@ export default {
           return a.name.localeCompare(b.name);
         });
 
-
         //1.iOS/1.Bars/1.Status Bar/Light Status Bar
         lib.menu = lib.sections.reduce((menu, item) => {
           let names = item.name.split("/");
-          if(names.length === 0) return;
+          if (names.length === 0) return;
           if (!menu[names[0]]) menu[names[0]] = {};
           if (!menu[names[0]][names[1]]) {
             menu[names[0]][names[1]] = [];
-          }else{
-            item.name = names.splice(2).join("/");
+          } else {
             menu[names[0]][names[1]].push(item);
           }
           return menu;
@@ -98,6 +128,13 @@ export default {
       //   height: rect.bottom - rect.top
       // };
       window.postMessage("startDragging", section);
+    },
+    changeLibrary(i) {
+      this.currentLibrary = i;
+    },
+    changeSection(sec) {
+      this.currentSection = sec;
+      console.log(sec);
     },
 
     requestLayerImageUrl(symbol) {
