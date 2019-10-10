@@ -29,7 +29,8 @@
     "@skpm/path": "^0.1.4",
     "babel-polyfill": "^6.26.0",
     "css-loader": "^1.0.0",
-    "html-loader": "^0.5.1"
+    "html-loader": "^0.5.1",
+    "vue-loader": "^15.7.1"
   },
   "resources": [
     "resources/**/*.js"

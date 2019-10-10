@@ -38,13 +38,13 @@ export default {
         id: mockData.libraries.id || "",
         name: mockData.libraries.name || ""
       },
-      libraries: mockData.libraries,
+      libraries: {},
       progress: 0,
-      currentSymbol: {}
+      currentSymbol: {},
+      menu: []
     };
   },
   mounted() {
-    console.log(window.location);
     this.devWeb = window.location.protocol === "http:" ? true : false;
     let _this = this;
     window.receiveData = function(data) {
@@ -58,13 +58,38 @@ export default {
   },
   methods: {
     init() {
-      this.setupPostMessage();
-      this.processData(this.libraries.symbols);
+      // this.setupPostMessage();
+      // console.log(this.libraries);
+      this.processData(mockData.libraries);
     },
     setupPostMessage() {
       window.postMessage("loadKit", "receiveData", "progress");
     },
-    processData(symbols) {},
+    processData(libraries) {
+      libraries.forEach(lib => {
+        //sort symbols by name string;
+        lib.sections.sort((a, b) => {
+          return a.name.localeCompare(b.name);
+        });
+
+
+        //1.iOS/1.Bars/1.Status Bar/Light Status Bar
+        lib.menu = lib.sections.reduce((menu, item) => {
+          let names = item.name.split("/");
+          if(names.length === 0) return;
+          if (!menu[names[0]]) menu[names[0]] = {};
+          if (!menu[names[0]][names[1]]) {
+            menu[names[0]][names[1]] = [];
+          }else{
+            item.name = names.splice(2).join("/");
+            menu[names[0]][names[1]].push(item);
+          }
+          return menu;
+        }, {});
+      });
+      console.log(libraries);
+      this.libraries = libraries;
+    },
     dragSymbol(section) {
       // rect = {
       //   x: rect.left,
@@ -72,7 +97,7 @@ export default {
       //   width: rect.right - rect.left,
       //   height: rect.bottom - rect.top
       // };
-      window.postMessage("startDragging",section);
+      window.postMessage("startDragging", section);
     },
 
     requestLayerImageUrl(symbol) {
