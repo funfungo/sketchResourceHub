@@ -3,11 +3,19 @@
   padding: 0;
 }
 :root{
-
+  --c-border: rgba(0,0,0, 0.1);
+  --c-color: rgba(0, 0, 0, 0.9);
+  --c-color-highlight: #06AE56;
 }
 body{
-  background-color: rgba(0,0,0,0.1);
+  background-color: #E5E5E5;
+  -webkit-user-select: none;
+  user-select: none;
   font-family: "mp-quote", -apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif;
+  overflow: hidden;
+  color: var(--c-color);
+  width: 1000px;
+  height: 1000px;
 }
 ul,li{
   list-style: none;
@@ -21,7 +29,7 @@ ul,li{
   line-height: 40px;
 }
 .symbol__main{
-  border-top: .5px solid rgba(0,0,0, 0.1);
+  border-top: .5px solid var(--c-border);
   display: flex;
   flex: 1;
   overflow: hidden;
@@ -31,15 +39,27 @@ ul,li{
 }
 .symbol__menu-section{
   min-width: 100px;
-  border-right: .5px solid rgba(0,0,0,0.1);
+  border-right: .5px solid var(--c-border);
+  max-width: 200px;
 }
 .symbol__menu-title{
-  padding: 5px 10px;
+  padding: 0 10px;
+  border-bottom: .5px solid var(--c-border);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.symbol__menu-title.current{
+  color: var(--c-color-highlight);
 }
 .symbol__menu-head{
   min-width: 150px;
   overflow: auto;
-  border-right: .5px solid rgba(0,0,0,0.1);
+  border-right: .5px solid var(--c-border);
 }
 .symbol__menu-item{
   &:first-child{
@@ -49,28 +69,34 @@ ul,li{
   }
 }
 .symbol__menu-item-title{
-  padding: 5px 10px;
-  border-bottom: .5px solid rgba(0,0,0, 0.1);
-  border-top: .5px solid rgba(0,0,0, 0.1);
+  padding: 0 10px;
+  border-bottom: .5px solid var(--c-border);
+  border-top: .5px solid var(--c-border);
   font-size: 17px;
+  line-height: 30px;
   font-weight: 500;
 }
 .symbol__submenu{
   margin-left: 15px;
   color: rgba(0,0,0,0.5);
   li{
-    padding: 5px 10px;
-    border-bottom: .5px solid rgba(0,0,0, 0.1);
+    padding: 0 10px;
+    border-bottom: .5px solid var(--c-border);
     cursor: pointer;
+    line-height: 30px;
     &:last-child{
       border: none;
+    }
+    &.current{
+      color: var(--c-color-highlight);
     }
   }
 }
 .symbol__list{
+  position: relative;
   overflow: auto;
   flex: 1;
-  padding: 0 10px;
+  padding: 0 10px 20px;
 }
 .symbol__sublist-container{
   // display: flex;
@@ -82,7 +108,7 @@ ul,li{
   font-size: 0;
   img{
     cursor: pointer;
-    border: .5px solid rgba(0,0,0,0.1);
+    border: .5px solid var(--c-border);
   }
 }
 .symbol__item-title{

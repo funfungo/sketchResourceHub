@@ -10,6 +10,7 @@
           <div class="symbol__menu-section">
             <div
               class="symbol__menu-title"
+              :class="{current: i === currentLibrary}"
               v-for="(lib, i) in libraries"
               :key="lib.id"
               @click="changeLibrary(i)"
@@ -25,6 +26,7 @@
                 <div class="symbol__menu-item-title">{{key}}</div>
                 <ul class="symbol__submenu">
                   <li
+                    :class="{current : currentSection === key + '_' + subkey}"
                     v-for="(sublist, subkey) of list"
                     :key="subkey"
                     @click="changeSection(key + '_' + subkey)"
@@ -34,9 +36,18 @@
             </ul>
           </div>
         </div>
-        <div class="symbol__list">
-          <div class="symbol__list-item" v-for="(list, key) of libraries[currentLibrary].menu" :key="key">
-            <div class="symbol__sublist-container" v-for="(sublist, subkey) of list" :key="subkey" :id="key + '_' + subkey">
+        <div class="symbol__list" v-if="libraries[currentLibrary]" @scroll="onScrollList">
+          <div
+            class="symbol__list-item"
+            v-for="(list, key) of libraries[currentLibrary].menu"
+            :key="key"
+          >
+            <div
+              class="symbol__sublist-container"
+              v-for="(sublist, subkey) of list"
+              :key="subkey"
+              :id="key + '_' + subkey"
+            >
               <div v-for="item in sublist" :key="item.id" class="symbol__item">
                 <div class="symbol__item-title">{{item.name}}</div>
                 <img
@@ -73,6 +84,7 @@ export default {
       currentLibrary: 0,
       currentSection: "",
       currentSymbol: {},
+      scrollRecord: {},
       menu: []
     };
   },
@@ -83,6 +95,8 @@ export default {
     window.receiveData = function(data) {
       _this.processData(data.libraries);
       _this.loading = false;
+      console.log("receive");
+      _this.calcScrollRecords();
     };
     window.progress = function(progress) {
       _this.progress = progress;
@@ -94,9 +108,11 @@ export default {
     init() {
       this.setupPostMessage();
       this.processData(mockData.libraries);
+      this.calcScrollRecords();
     },
     setupPostMessage() {
-      if(!this.devWeb) window.postMessage("loadKit", "receiveData", "progress");
+      if (!this.devWeb)
+        window.postMessage("loadKit", "receiveData", "progress");
     },
     processData(libraries) {
       libraries.forEach(lib => {
@@ -121,22 +137,38 @@ export default {
       this.libraries = libraries;
     },
     dragSymbol(section) {
-      // rect = {
-      //   x: rect.left,
-      //   y: rect.top,
-      //   width: rect.right - rect.left,
-      //   height: rect.bottom - rect.top
-      // };
       window.postMessage("startDragging", section);
     },
     changeLibrary(i) {
       this.currentLibrary = i;
+      this.calcScrollRecords();
     },
     changeSection(sec) {
       this.currentSection = sec;
-      console.log(sec);
+      let scrollTop = this.scrollRecord[this.currentLibrary][sec];
+      document.querySelector(".symbol__list").scrollTop = scrollTop;
     },
-
+    calcScrollRecords() {
+      if (this.scrollRecord[this.currentLibrary]) return;
+      let mapScroll = {};
+      this.$nextTick(() => {
+        document
+          .querySelectorAll(".symbol__sublist-container")
+          .forEach(item => {
+            let [a, b] = item.id.split("_");
+            mapScroll[item.id] = item.offsetTop;
+          });
+        if (Object.keys(mapScroll).length > 0) {
+          this.scrollRecord[this.currentLibrary] = mapScroll;
+        }
+      });
+    },
+    onScrollList(e){
+      let secIndex = Object.keys(this.scrollRecord[this.currentLibrary]).findIndex((key) => {
+        return this.scrollRecord[this.currentLibrary][key] >= e.target.scrollTop;
+      })
+      this.currentSection = Object.keys(this.scrollRecord[this.currentLibrary])[secIndex-1];
+    },
     requestLayerImageUrl(symbol) {
       let canvas = document.createElement("canvas");
       canvas.width = symbol.width * 2;

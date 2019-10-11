@@ -75,15 +75,17 @@ class UIKit {
   createAndShow() {
     let docWindow = this.context.document.documentWindow();
     this.browserWindow = new BrowserWindow({
-      backgroundColor: "#ffffffff",
+      backgroundColor: "#E5E5E5",
       identifier: webviewIdentifier,
       width: 800,
       height: 600,
       show: false,
       alwaysOnTop: true,
-      frame: true,
-      hasShadow: true,
-      acceptsFirstMouse: true
+      frame: false,
+      acceptsFirstMouse: true,
+      webPreferences: {
+        // devTools: false
+      }
     });
 
     this.webContents = this.browserWindow.webContents;
@@ -98,7 +100,7 @@ class UIKit {
       this.browserWindow.close();
     });
 
-    // this.browserWindow.setResizable(false);
+    this.browserWindow.setResizable(false);
     // this.browserWindow._panel.setFrame_display_animate_(
     //   docWindow.frame(),
     //   false,
