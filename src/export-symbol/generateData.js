@@ -11,6 +11,7 @@ const FORCE_REBULD = false;
 
 export async function generateData({onProgress}) {
   let libraries = findLib();
+
   let progressReporter = new ProgressReporter();
   progressReporter.on('progress', progress => {
     onProgress(progress);
@@ -25,7 +26,6 @@ export async function generateData({onProgress}) {
     );
 
     let cachePath = path.join(util.getPluginCachePath(), lib.libraryId);
-
     let libraryIndex = null;
     let indexCachePath = path.join(cachePath, "index.json");
 
@@ -45,7 +45,7 @@ export async function generateData({onProgress}) {
       let doc = util.loadDocFromSketchFile(lib.sketchFilePath);
       doc.setFileURL(NSURL.fileURLWithPath(lib.sketchFilePath));
 
-      libraryIndex = await buildSymbolIndexFormLibrary(lib.libraryId, lib.name, doc, childProgressReporters[i]);
+      libraryIndex = await buildSymbolIndexFormLibrary(lib.libraryId, lib.name, doc, childProgressReporters[i], cachePath);
       // cache the index
       util.mkdirpSync(path.dirname(indexCachePath));
       fs.writeFileSync(indexCachePath,
@@ -60,10 +60,9 @@ export async function generateData({onProgress}) {
   }
   return compositeIndex;
 }
-async function buildSymbolIndexFormLibrary(libraryId, defaultLibName, document, progressReporter) {
+async function buildSymbolIndexFormLibrary(libraryId, defaultLibName, document, progressReporter, cachePath) {
   let libraryIndex = { id: libraryId, name:defaultLibName, sections: [] };
-  let cachePath = path.join(util.getPluginCachePath(), libraryId);
-  console.log(cachePath);
+  // let cachePath = path.join(util.getPluginCachePath(), libraryId,);
   let allLayers = util.getAllSymbolLayers(document);
   progressReporter.total = allLayers.length;
   // allTextLayers.reverse();

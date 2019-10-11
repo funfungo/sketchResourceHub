@@ -3,7 +3,7 @@
     <div class="loading" v-if="loading">
       <div>{{progress}}</div>
     </div>
-    <div class="symbol__container" else>
+    <div class="symbol__container" v-else>
       <div class="symbol__search">搜索</div>
       <div class="symbol__main">
         <div class="symbol__menu">
@@ -60,7 +60,7 @@ export default {
   data() {
     return {
       devWeb: true,
-      loading: false,
+      loading: true,
       info: {
         archiveVersion: mockData.libraries.archiveVersion || 0,
         fileHash: mockData.libraries.fileHash || "0",
@@ -68,7 +68,7 @@ export default {
         id: mockData.libraries.id || "",
         name: mockData.libraries.name || ""
       },
-      libraries: {},
+      libraries: [],
       progress: 0,
       currentLibrary: 0,
       currentSection: "",
@@ -78,9 +78,11 @@ export default {
   },
   mounted() {
     this.devWeb = window.location.protocol === "http:" ? true : false;
+    this.loading = this.devWeb ? false : true;
     let _this = this;
     window.receiveData = function(data) {
-      _this.libraries = JSON.parse(JSON.stringify(data)).libraries;
+      _this.processData(data.libraries);
+      _this.loading = false;
     };
     window.progress = function(progress) {
       _this.progress = progress;
@@ -90,12 +92,11 @@ export default {
   },
   methods: {
     init() {
-      // this.setupPostMessage();
-      // console.log(this.libraries);
+      this.setupPostMessage();
       this.processData(mockData.libraries);
     },
     setupPostMessage() {
-      window.postMessage("loadKit", "receiveData", "progress");
+      if(!this.devWeb) window.postMessage("loadKit", "receiveData", "progress");
     },
     processData(libraries) {
       libraries.forEach(lib => {
@@ -117,7 +118,6 @@ export default {
           return menu;
         }, {});
       });
-      console.log(libraries);
       this.libraries = libraries;
     },
     dragSymbol(section) {
@@ -157,8 +157,6 @@ export default {
         symbol.height / 2
       );
       let url = canvas.toDataURL();
-      // let subPath = sticker.imagePath.replace(/.*net.nurik.roman.sketch.stickers/, '');
-      // let url = '/real-sticker-cache/' + subPath;
       return url;
     }
   }

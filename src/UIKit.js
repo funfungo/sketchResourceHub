@@ -272,7 +272,7 @@ class UIKit {
 
     // add a handler for a call from web content's javascript
     this.webContents.on("startDragging", (section) => {
-      console.log(section)
+      console.log(section);
       let rect = {
         width: section.width,
         height: section.height
