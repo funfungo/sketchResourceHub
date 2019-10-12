@@ -1,5 +1,5 @@
 import sketch from "sketch";
-const { promisedExec } = require("./utils");
+const { promisedExec, promisedExecMv } = require("./utils");
 var dataDocument = require("sketch/dom").getSelectedDocument();
 
 // sketchtool path
@@ -48,7 +48,7 @@ export function generateSliceImages(file, dest, scale) {
 }
 
 export function rename(src, dest) {
-  return promisedExec("mv", [src, dest]);
+  return promisedExecMv("mv", [src, dest]);
 }
 
 function escape(url) {
