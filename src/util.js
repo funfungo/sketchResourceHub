@@ -94,6 +94,21 @@ export function findSymbolMaster(context) {
   return ret;
 }
 
+export function findPagesMaster(context) {
+  var page = context.document.currentPage();
+  var ret = [];
+  var symbols = page.layers();
+  for (var k = 0; k < symbols.count(); k++) {
+    var s = symbols.objectAtIndex(k).layers();
+    for(var i = 0; i <s.count(); i++){
+      if(s.objectAtIndex(i).className() == 'MSSymbolInstance'){
+        ret.push(s.objectAtIndex(i));
+      }
+    }
+  }
+  return ret;
+}
+
 export function encodeBase64(filePath) {
   var file = NSData.alloc().initWithContentsOfFile(filePath);
   var SketchContent = file.base64EncodedStringWithOptions(0) + '';
@@ -142,4 +157,9 @@ export function zip(args) {
   task.setStandardOutput(outputPipe);
   task.launch();
 }
+
+export function openURL(url) {
+  NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(NSString.stringWithString(url).stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)));
+}
+
 

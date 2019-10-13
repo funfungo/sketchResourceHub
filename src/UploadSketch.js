@@ -58,7 +58,7 @@ export default function() {
     util.mkdirpSync(basePath + 'html/');
     var sketchFileUrl = basePath + 'sketch/' + SketchName + '.sketch';
     util.saveSketchFile(sketchFileUrl ,() => {
-      var symbols = util.findSymbolMaster(context);
+      var symbols = util.findPagesMaster(context);
       util.mkdirpSync(basePath + 'symbolpng');
       util.mkdirpSync(basePath + 'symbolsvg');
       symbols.forEach((symbol,item) => {
@@ -75,6 +75,11 @@ export default function() {
       });
       
     });
+  });
+
+  
+  webContents.on('openURL', s => {
+    util.openURL(s);
   });
 
 
