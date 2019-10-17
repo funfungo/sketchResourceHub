@@ -3,12 +3,12 @@ if (!global._babelPolyfill) {
 }
 
 import * as fs from "@skpm/fs";
-import path from '@skpm/path';
+import path from "@skpm/path";
 import BrowserWindow, { fromId } from "sketch-module-web-view";
 import { getWebview } from "sketch-module-web-view/remote";
 import { generateData } from "./export-symbol/generateData";
-import * as libraries from './export-symbol/libraries';
-import * as util from './export-symbol/util';
+import * as libraries from "./export-symbol/libraries";
+import * as util from "./export-symbol/util";
 const webviewIdentifier = "sketchresourcehub.webview";
 const document = context.document;
 const selection = context.selection;
@@ -150,13 +150,12 @@ class UIKit {
 
   getStickerCachedImagePath(stickerId) {
     let [libraryId, layerId] = stickerId.split(/\./, 2);
-    return path.join(util.getPluginCachePath(), libraryId, layerId + '.png');
+    return path.join(util.getPluginCachePath(), libraryId, layerId + ".png");
   }
-
 
   getStickerCachedContentPath(stickerId) {
     let [libraryId, layerId] = stickerId.split(/\./, 2);
-    return path.join(util.getPluginCachePath(), libraryId, layerId + '.json');
+    return path.join(util.getPluginCachePath(), libraryId, layerId + ".json");
   }
 
   /**
@@ -173,6 +172,7 @@ class UIKit {
       this.getStickerCachedContentPath(stickerId),
       { encoding: "utf8" }
     );
+
     let decodedImmutableObj = MSJSONDataUnarchiver.unarchiveObjectWithString_asVersion_corruptionDetected_error(
       serializedLayerJson,
       archiveVersion || 999,
@@ -203,7 +203,7 @@ class UIKit {
     let dragItem = NSDraggingItem.alloc().initWithPasteboardWriter(image);
     // pbItem.release();
     dragItem.setDraggingFrame_contents_(
-      NSMakeRect(0, 0, rect.width, rect.height),
+      NSMakeRect(rect.x, rect.y, rect.width, rect.height),
       image
     );
     let mouse = NSEvent.mouseLocation();
@@ -236,7 +236,9 @@ class UIKit {
     let dpb = NSPasteboard.pasteboardWithName(NSDragPboard);
     dpb.clearContents();
     try {
-      let newPbLayers = MSPasteboardLayers.pasteboardLayersWithLayers([layer]);
+      let symbol = layer.newSymbolInstance();
+      let newPbLayers = MSPasteboardLayers.pasteboardLayersWithForeignLayers([symbol]);
+      console.log(newPbLayers);
       MSPasteboardManager.writePasteboardLayers_toPasteboard(newPbLayers, dpb);
     } catch (err) {
       throw err;
@@ -273,12 +275,7 @@ class UIKit {
     });
 
     // add a handler for a call from web content's javascript
-    this.webContents.on("startDragging", (section) => {
-      console.log(section);
-      let rect = {
-        width: section.width,
-        height: section.height
-      }
+    this.webContents.on("startDragging", (section, rect) => {
       try {
         let [libraryId, layerId] = section.id.split(/\./, 2);
         let archiveVersion = libraryIndexesById[libraryId].archiveVersion;
@@ -303,5 +300,4 @@ class UIKit {
 
     this.webContents.on("close", () => this.browserWindow.close());
   }
-
 }

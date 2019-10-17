@@ -4,8 +4,15 @@
       <div>{{progress}}</div>
     </div>
     <div class="symbol__container" v-else>
-      <div class="symbol__search">搜索</div>
-      <div class="symbol__main">
+      <div class="symbol__search">
+        <!-- <span class="symbol__search-label">搜索</span> -->
+        <div class="symbol__search-box">
+          <input type="text" v-model="searchText" />
+          <div class="symbol__search-cancel"></div>
+        </div>
+      </div>
+      <div v-if="searchResult.length != 0"></div>
+      <div class="symbol__main" v-else>
         <div class="symbol__menu">
           <div class="symbol__menu-section">
             <div
@@ -54,7 +61,7 @@
                   :src="devWeb ? requestLayerImageUrl(item) : 'file://' + item.imagePath"
                   :width="item.width"
                   :height="item.height"
-                  @mousedown="dragSymbol(item)"
+                  @mousedown="dragSymbol($event, item)"
                 />
               </div>
             </div>
@@ -85,8 +92,20 @@ export default {
       currentSection: "",
       currentSymbol: {},
       scrollRecord: {},
+      searchText: "",
+      searchResult: [],
+      disableScrollListener: false,
       menu: []
     };
+  },
+  watch: {
+    searchText: val => {
+      console.log(val);
+
+      this.libraries.reduce((search, lib) => {
+        return search;
+      }, []);
+    }
   },
   mounted() {
     this.devWeb = window.location.protocol === "http:" ? true : false;
@@ -95,7 +114,6 @@ export default {
     window.receiveData = function(data) {
       _this.processData(data.libraries);
       _this.loading = false;
-      console.log("receive");
       _this.calcScrollRecords();
     };
     window.progress = function(progress) {
@@ -134,16 +152,28 @@ export default {
           return menu;
         }, {});
       });
+      console.log(libraries);
       this.libraries = libraries;
     },
-    dragSymbol(section) {
-      window.postMessage("startDragging", section);
+    dragSymbol(ev, section) {
+      // console.log('hello');
+      console.log(section);
+      let rect = ev.target.getBoundingClientRect();
+      rect = {
+        x: rect.left,
+        y: rect.top,
+        width: rect.right - rect.left,
+        height: rect.bottom - rect.top
+      };
+      console.log(rect);
+      window.postMessage("startDragging", section, rect);
     },
     changeLibrary(i) {
       this.currentLibrary = i;
       this.calcScrollRecords();
     },
     changeSection(sec) {
+      this.disableScrollListener = true;
       this.currentSection = sec;
       let scrollTop = this.scrollRecord[this.currentLibrary][sec];
       document.querySelector(".symbol__list").scrollTop = scrollTop;
@@ -163,11 +193,21 @@ export default {
         }
       });
     },
-    onScrollList(e){
-      let secIndex = Object.keys(this.scrollRecord[this.currentLibrary]).findIndex((key) => {
-        return this.scrollRecord[this.currentLibrary][key] >= e.target.scrollTop;
-      })
-      this.currentSection = Object.keys(this.scrollRecord[this.currentLibrary])[secIndex-1];
+    onScrollList(e) {
+      if (!this.disableScrollListener) {
+        let secIndex = Object.keys(
+          this.scrollRecord[this.currentLibrary]
+        ).findIndex(key => {
+          return (
+            this.scrollRecord[this.currentLibrary][key] >= e.target.scrollTop
+          );
+        });
+        this.currentSection = Object.keys(
+          this.scrollRecord[this.currentLibrary]
+        )[secIndex - 1];
+      } else {
+        this.disableScrollListener = false;
+      }
     },
     requestLayerImageUrl(symbol) {
       let canvas = document.createElement("canvas");
@@ -193,6 +233,23 @@ export default {
     }
   }
 };
+// console.log($vm.searchText);
+// Vue.component("hilitext", {
+//   template: `<div v-html="highlight(text, $vm.searchText)"></div>`,
+//   props: ["text"],
+//   methods: {
+//     highlight: (text, query) => {
+//       if (!query) {
+//         return text;
+//       }
+
+//       return String(text || "").replace(
+//         this.regexForSearchText(query),
+//         hiliteReplacer_
+//       );
+//     }
+//   }
+// });
 </script>
 
 <style lang="less">
