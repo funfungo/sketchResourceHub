@@ -62,8 +62,8 @@ export default function() {
       util.mkdirpSync(basePath + 'symbolpng');
       util.mkdirpSync(basePath + 'symbolsvg');
       symbols.forEach((symbol,item) => {
-        util.captureLayerImage(context, symbol, basePath + 'symbolpng/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.png');
-        util.captureLayerImage(context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig,'_') + '-----' + symbol.objectID() + '.svg', 'svg');
+        util.captureLayerImage(context, symbol, basePath + 'symbolpng/' + symbol.name().replace(/\//ig,'_') + '.png');
+        util.captureLayerImage(context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig,'_') + '.svg', 'svg');
       })
       generateHtml(sketchFileUrl,basePath + 'html/').then(()=>{
         util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
@@ -88,7 +88,7 @@ export default function() {
     browserWindow.close();
   });
 
-  browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://wedesign.oa.com/UploadSketch?sketch=1');
 }
 
 export function onShutdown() {

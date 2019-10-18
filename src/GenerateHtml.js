@@ -12,9 +12,6 @@ import {
 export function generateHtml(filePath,tmpPath) {
   const document = context.document;
 
-  console.log(filePath);
-  console.log(tmpPath);
-
   const NAME_MAP = {};
   let transformer;
   // unzip current sketch file task tmpPath
