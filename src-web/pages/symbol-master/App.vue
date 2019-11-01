@@ -157,7 +157,6 @@ export default {
     },
     dragSymbol(ev, section) {
       // console.log('hello');
-      console.log(section);
       let rect = ev.target.getBoundingClientRect();
       rect = {
         x: rect.left,
@@ -165,7 +164,6 @@ export default {
         width: rect.right - rect.left,
         height: rect.bottom - rect.top
       };
-      console.log(rect);
       window.postMessage("startDragging", section, rect);
     },
     changeLibrary(i) {

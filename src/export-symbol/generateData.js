@@ -28,7 +28,6 @@ export async function generateData({onProgress}) {
     let cachePath = path.join(util.getPluginCachePath(), lib.libraryId);
     let libraryIndex = null;
     let indexCachePath = path.join(cachePath, "index.json");
-
     try {
       libraryIndex = JSON.parse(
         fs.readFileSync(indexCachePath, { encoding: "utf8" })
@@ -69,7 +68,8 @@ async function buildSymbolIndexFormLibrary(libraryId, defaultLibName, document, 
   for( let layer of allLayers){
     progressReporter.increment();
     let parsedName = parseLayerName(String(layer.name()));
-    let layerId = String(layer.objectID());
+    // let layerId = String(layer.objectID());
+    let layerId = String(layer.symbolID());
     let id = libraryId + "." + layerId;
     let layerInfo = {
       type: "layer",

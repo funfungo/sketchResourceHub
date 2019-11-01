@@ -9,6 +9,7 @@ import { getWebview } from "sketch-module-web-view/remote";
 import { generateData } from "./export-symbol/generateData";
 import * as libraries from "./export-symbol/libraries";
 import * as util from "./export-symbol/util";
+
 const webviewIdentifier = "sketchresourcehub.webview";
 const document = context.document;
 const selection = context.selection;
@@ -16,7 +17,33 @@ let layer;
 
 const THREAD_DICT_KEY = "WeuiUIKit.BrowserWindow";
 
+
+
+
+
 export default function() {
+
+  // console.log(symbolMaster);
+  // // console.log(symbolInstance)
+
+  // let myArtboard = new Artboard({
+  //   parent: page
+  // })
+  // symbolInstance.parent = myArtboard;
+  // myArtboard.adjustToFit();
+
+  // var libraries = NSApp.delegate().librariesController().libraries();
+  // var library = libraries.objectAtIndex(0);
+
+  // var foreignSymbol = MSForeignSymbol.foreignSymbolWithMaster_inLibrary(library.document().localSymbols().objectAtIndex(0), library);
+  // context.document.documentData().addForeignSymbol(foreignSymbol);
+  // var importedSymbol = assetLibraryController.importForeignSymbol_fromLibrary_intoDocument(foreignSymbol, library, context.document.documentData());
+
+  // var instance = foreignSymbol.symbolMaster().newSymbolInstance();
+  // context.document.currentPage().addLayers([symbolInstance.sketchObject]);
+
+
+
   // const browserWindow = new BrowserWindow(options);
   // browserWindow.setResizable(false);
 
@@ -84,7 +111,7 @@ class UIKit {
       frame: false,
       acceptsFirstMouse: true,
       webPreferences: {
-        // devTools: false
+        devTools: false
       }
     });
 
@@ -161,8 +188,12 @@ class UIKit {
   /**
    * Triggers the beginning of a drag operation on the given sticker ID
    */
-  startDragging(libraryId, archiveVersion, stickerId, rect, srcView) {
-    let library = libraries.getLibraryById(libraryId, { onlyEnabled: true });
+  startDragging(libraryId, symbolName, archiveVersion, stickerId, rect, srcView) {
+    let libs = require('sketch/dom').getLibraries();
+    let libraryJS = libs.filter(lib => lib.id === libraryId)[0];
+    console.log(libraryJS);
+
+    // let library = libraries.getLibraryById(libraryId, { onlyEnabled: true });
     let image = NSImage.alloc().initWithContentsOfFile(
       this.getStickerCachedImagePath(stickerId)
     );
@@ -179,29 +210,18 @@ class UIKit {
       null,
       null
     );
-    let layer = decodedImmutableObj.newMutableCounterpart();
+    // let layer = decodedImmutableObj.newMutableCounterpart();
+    let documentJs = require('sketch/dom').getSelectedDocument();
+    let symbolReferences = libraryJS.getImportableSymbolReferencesForDocument(documentJs);
+    let segmentedControlImportableObject = symbolReferences.filter(symbol => {
+      return symbol.name == symbolName
+    })
+    console.log(segmentedControlImportableObject);
+    var symbolMaster = segmentedControlImportableObject[0].import();
+    let symbolInstance = symbolMaster.createNewInstance();
 
-    // create a dummy document and import the layer into it, so that
-    // foreign symbols can be created in it and sent along with the layer
-    // to the pasteboard
-    let dummyDocData = MSDocumentData.alloc().init();
-    dummyDocData.addBlankPage().addLayer(layer);
 
-    // import any symbols and shared styles used in library (either from the library itself or
-    // other libraries referenced from the library... i.e. nested libraries)
-    libraries.replaceSymbolsAndSharedStylesInLayerWithLibrary(
-      dummyDocData,
-      layer,
-      library
-    );
-
-    // initiate cocoa drag operation
-    // let pbItem = NSPasteboardItem.new();
-    // pbItem.setData_forType_(
-    //     image.TIFFRepresentation(),
-    //     NSPasteboardTypePNG);
     let dragItem = NSDraggingItem.alloc().initWithPasteboardWriter(image);
-    // pbItem.release();
     dragItem.setDraggingFrame_contents_(
       NSMakeRect(rect.x, rect.y, rect.width, rect.height),
       image
@@ -236,9 +256,7 @@ class UIKit {
     let dpb = NSPasteboard.pasteboardWithName(NSDragPboard);
     dpb.clearContents();
     try {
-      let symbol = layer.newSymbolInstance();
-      let newPbLayers = MSPasteboardLayers.pasteboardLayersWithForeignLayers([symbol]);
-      console.log(newPbLayers);
+      let newPbLayers = MSPasteboardLayers.pasteboardLayersWithForeignLayers([symbolInstance.sketchObject]);
       MSPasteboardManager.writePasteboardLayers_toPasteboard(newPbLayers, dpb);
     } catch (err) {
       throw err;
@@ -278,9 +296,11 @@ class UIKit {
     this.webContents.on("startDragging", (section, rect) => {
       try {
         let [libraryId, layerId] = section.id.split(/\./, 2);
+        let symbolName = section.name;
         let archiveVersion = libraryIndexesById[libraryId].archiveVersion;
         this.startDragging(
           libraryId,
+          symbolName,
           archiveVersion,
           section.id,
           rect,
