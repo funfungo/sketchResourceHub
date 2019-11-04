@@ -28,6 +28,7 @@ export async function generateData({onProgress}) {
     let cachePath = path.join(util.getPluginCachePath(), lib.libraryId);
     let libraryIndex = null;
     let indexCachePath = path.join(cachePath, "index.json");
+    console.log(cachePath);
     try {
       libraryIndex = JSON.parse(
         fs.readFileSync(indexCachePath, { encoding: "utf8" })
@@ -79,8 +80,10 @@ async function buildSymbolIndexFormLibrary(libraryId, defaultLibName, document, 
       imagePath: path.join(cachePath, layerId + ".png"),
       contentPath: path.join(cachePath, layerId + ".json"),
       width: Number(layer.absoluteInfluenceRect().size.width),
-      height: Number(layer.absoluteInfluenceRect().size.height)
+      height: Number(layer.absoluteInfluenceRect().size.height),
+      bgColor: layer.hasBackgroundColor() ? util.convertColor(layer.backgroundColor().RGBADictionary()) : '255, 255, 255, 1'
     };
+
     util.captureLayerImage(document, layer, layerInfo.imagePath);
 
     let imm = layer.immutableModelObject();
@@ -126,7 +129,6 @@ function findLib() {
       }
       return firstWithId;
     });
-    console.log(typeof libraries);
   return libraries;
 }
 

@@ -61,6 +61,7 @@
                   :src="devWeb ? requestLayerImageUrl(item) : 'file://' + item.imagePath"
                   :width="item.width"
                   :height="item.height"
+                  :style="'background-color: rgba(' + item.bgColor + ')'"
                   @mousedown="dragSymbol($event, item)"
                 />
               </div>

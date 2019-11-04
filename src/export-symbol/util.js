@@ -282,3 +282,13 @@ export function getAllSymbolLayers(document){
   })
   return symbols;
 }
+
+
+export function convertColor(str) {
+  let color = dictFromNSDict(str);
+  let red = color.r * 255;
+  let green = color.g * 255;
+  let blur = color.b * 255;
+  let alpha = color.a;
+  return `${red},${green},${blur},${alpha}`;
+}

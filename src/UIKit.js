@@ -22,52 +22,6 @@ const THREAD_DICT_KEY = "WeuiUIKit.BrowserWindow";
 
 
 export default function() {
-
-  // console.log(symbolMaster);
-  // // console.log(symbolInstance)
-
-  // let myArtboard = new Artboard({
-  //   parent: page
-  // })
-  // symbolInstance.parent = myArtboard;
-  // myArtboard.adjustToFit();
-
-  // var libraries = NSApp.delegate().librariesController().libraries();
-  // var library = libraries.objectAtIndex(0);
-
-  // var foreignSymbol = MSForeignSymbol.foreignSymbolWithMaster_inLibrary(library.document().localSymbols().objectAtIndex(0), library);
-  // context.document.documentData().addForeignSymbol(foreignSymbol);
-  // var importedSymbol = assetLibraryController.importForeignSymbol_fromLibrary_intoDocument(foreignSymbol, library, context.document.documentData());
-
-  // var instance = foreignSymbol.symbolMaster().newSymbolInstance();
-  // context.document.currentPage().addLayers([symbolInstance.sketchObject]);
-
-
-
-  // const browserWindow = new BrowserWindow(options);
-  // browserWindow.setResizable(false);
-
-  // browserWindow.once("ready-to-show", () => {
-  //   browserWindow.show();
-  // });
-
-  // const webContents = browserWindow.webContents;
-
-  // webContents.on("did-finish-load", () => {
-  //   UI.message("UI loaded!");
-  //   generateData();
-  // });
-
-  // webContents.on("close", () => {
-  //   browserWindow.close();
-  // });
-
-  // browserWindow.on("blur", () => {
-  //   browserWindow.close();
-  // });
-  // var url = "../Resources/pages/symbol-master/index.html";
-  // browserWindow.loadURL(url);
-
   let window = new UIKit(context);
   window.showHide();
 }
@@ -128,11 +82,6 @@ class UIKit {
     });
 
     this.browserWindow.setResizable(false);
-    // this.browserWindow._panel.setFrame_display_animate_(
-    //   docWindow.frame(),
-    //   false,
-    //   false
-    // );
 
     this.browserWindow._panel.setHidesOnDeactivate(false);
 
@@ -210,10 +159,10 @@ class UIKit {
       null,
       null
     );
-    // let layer = decodedImmutableObj.newMutableCounterpart();
     let documentJs = require('sketch/dom').getSelectedDocument();
     let symbolReferences = libraryJS.getImportableSymbolReferencesForDocument(documentJs);
     let segmentedControlImportableObject = symbolReferences.filter(symbol => {
+      // TODO symbol name can be duplicated , try to use id to identify symbol
       return symbol.name == symbolName
     })
     console.log(segmentedControlImportableObject);
@@ -267,7 +216,7 @@ class UIKit {
     let libraryIndexesById = {};
 
     this.webContents.on("loadKit", (callbackName, progressCallbackName) => {
-      console.time("test");
+      console.time("loadKit time");
       generateData({
         onProgress: progress => {
           this.runWebCallback(progressCallbackName, progress);
@@ -278,7 +227,7 @@ class UIKit {
             libraryIndexesById[libraryIndex.id] = libraryIndex;
           });
           this.runWebCallback(callbackName, index);
-          console.timeEnd("test");
+          console.timeEnd("loadKit time");
         })
         .catch(e => {
           log(e);
@@ -287,7 +236,6 @@ class UIKit {
 
     this.webContents.on("requestLayerImageUrl", (id, callbackName) => {
       let imagePath = this.getStickerCachedImagePath(id);
-      // let url = nsImageToDataUri(NSImage.alloc().initWithContentsOfFile(imagePath));
       let url = "file://" + imagePath;
       this.runWebCallback(callbackName, id, url);
     });
@@ -307,7 +255,6 @@ class UIKit {
           this.browserWindow._webview
         );
       } catch (e) {
-        // TODO: do this everywhere somehow
         log(e.message);
         log(e);
       }
