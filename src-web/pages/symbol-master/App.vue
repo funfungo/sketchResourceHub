@@ -1,7 +1,12 @@
 <template>
   <div>
     <div class="loading" v-if="loading">
-      <div>{{progress}}</div>
+      <div class="loading__wrp">
+        <!-- {{progress}} -->
+        <div class="loading__bar">
+          <div class="loading__bar-inner" :style="'width: ' + progress * 100 + '%'"></div>
+        </div>
+      </div>
     </div>
     <div class="symbol__container" v-else>
       <div class="symbol__search">
@@ -79,7 +84,7 @@ export default {
   data() {
     return {
       devWeb: true,
-      loading: true,
+      loading: false,
       info: {
         archiveVersion: mockData.libraries.archiveVersion || 0,
         fileHash: mockData.libraries.fileHash || "0",
@@ -110,7 +115,6 @@ export default {
   },
   mounted() {
     this.devWeb = window.location.protocol === "http:" ? true : false;
-    this.loading = this.devWeb ? false : true;
     let _this = this;
     window.receiveData = function(data) {
       _this.processData(data.libraries);
@@ -119,6 +123,9 @@ export default {
     };
     window.progress = function(progress) {
       _this.progress = progress;
+      if(!_this.loading){
+        _this.loading = true;
+      }
     };
 
     this.init();
@@ -153,7 +160,6 @@ export default {
           return menu;
         }, {});
       });
-      console.log(libraries);
       this.libraries = libraries;
     },
     dragSymbol(ev, section) {

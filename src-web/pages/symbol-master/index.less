@@ -10,7 +10,7 @@
   --c-color-highlight: #06AE56;
   --c-color-desc: rgba(0, 0, 0, 0.5);
   --c-colors-desc-lighter: rgba(0, 0, 0, 0.3);
-
+  --c-progress-bg: rgba(0, 0, 0, 0.5);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,6 +21,7 @@
     --c-color-highlight: #06AE56;
     --c-color-desc: rgba(255, 255, 255, 0.5);
     --c-colors-desc-lighter: rgba(255, 255, 255, 0.3);
+    --c-progress-bg: rgba(255,255,255,.5)
   }
 }
 
@@ -204,7 +205,6 @@ li {
 .symbol__item {
   margin-right: 10px;
   font-size: 0;
-
   img {
     cursor: pointer;
   }
@@ -224,4 +224,30 @@ li {
   top: 0;
   background-color: var(--c-bg);
   font-size: 17px;
+}
+.loading__wrp{
+  padding: 0 100px;
+  position: absolute;
+  width: 100%;
+  box-sizing: border-box;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+.loading__bar{
+  height: 5px;
+  border-radius: 2.5px;
+  width: 100%;
+  background-color: var(--c-progress-bg);
+  overflow: hidden;
+  position: relative;
+}
+
+.loading__bar-inner{
+  position: absolute;
+  background-color: var(--c-color-highlight);
+  height: 5px;
+  left: 0;
+  top: 0;
+  width: 50%;
 }
