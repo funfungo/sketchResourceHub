@@ -13,13 +13,23 @@
         <!-- <span class="symbol__search-label">搜索</span> -->
         <div class="symbol__search-box">
           <input type="text" v-model="searchText" />
-          <div class="symbol__search-cancel"></div>
+          <div class="symbol__search-cancel" v-if="searchText.length > 0" @click="searchText = ''"></div>
         </div>
       </div>
-      <div v-if="searchResult.length != 0"></div>
+      <div class="symbol__empty" v-if="libraries.length === 0">无组件库</div>
       <div class="symbol__main" v-else>
         <div class="symbol__menu">
-          <div class="symbol__menu-section">
+          <div class="symbol__menu-section" v-if="searchText.length !== 0">
+            <div
+              class="symbol__menu-title"
+              :class="{current: i === currentLibrary}"
+              v-for="(lib, i) in libraries"
+              :key="lib.id"
+              @click="changeLibrary(i)"
+              v-html="lib.name"
+            ></div>
+          </div>
+          <div class="symbol__menu-section" v-else>
             <div
               class="symbol__menu-title"
               :class="{current: i === currentLibrary}"
@@ -35,8 +45,18 @@
                 v-for="(list, key) of libraries[currentLibrary].menu"
                 :key="key"
               >
-                <div class="symbol__menu-item-title">{{key}}</div>
-                <ul class="symbol__submenu">
+                <div class="symbol__menu-item-title" v-if="searchText.length !== 0" v-html="key"></div>
+                <div class="symbol__menu-item-title" v-else>{{key}}</div>
+                <ul class="symbol__submenu" v-if="searchText.length !== 0">
+                  <li
+                    :class="{current : currentSection === key + '_' + subkey}"
+                    v-for="(sublist, subkey) of list"
+                    :key="subkey"
+                    @click="changeSection(key + '_' + subkey)"
+                    v-html="subkey"
+                  ></li>
+                </ul>
+                <ul class="symbol__submenu" v-else>
                   <li
                     :class="{current : currentSection === key + '_' + subkey}"
                     v-for="(sublist, subkey) of list"
@@ -61,7 +81,8 @@
               :id="key + '_' + subkey"
             >
               <div v-for="item in sublist" :key="item.id" class="symbol__item">
-                <div class="symbol__item-title">{{item.name}}</div>
+                <div class="symbol__item-title" v-if="searchText.length !== 0" v-html="item.name"></div>
+                <div class="symbol__item-title" v-else>{{item.name}}</div>
                 <img
                   :src="devWeb ? requestLayerImageUrl(item) : 'file://' + item.imagePath"
                   :width="item.width"
@@ -93,24 +114,51 @@ export default {
         name: mockData.libraries.name || ""
       },
       libraries: [],
+      originLibraries: [],
       progress: 0,
       currentLibrary: 0,
       currentSection: "",
       currentSymbol: {},
       scrollRecord: {},
       searchText: "",
-      searchResult: [],
       disableScrollListener: false,
       menu: []
     };
   },
   watch: {
-    searchText: val => {
-      console.log(val);
-
-      this.libraries.reduce((search, lib) => {
+    searchText: function(val) {
+      if (val.length == 0) {
+        this.libraries = this.originLibraries;
+        return;
+      }
+      let searchResult = this.originLibraries.reduce((search, lib) => {
+        let result = [];
+        for (let i = 0; i < lib.sections.length; i++) {
+          let reg = new RegExp(val, "i", "g");
+          if (lib.sections[i].name.match(reg)) {
+            let target = Object.assign({}, lib.sections[i]);
+            target.name = target.name.replace(
+              reg,
+              '<span class="highlight">$&</span>'
+            );
+            result.push(target);
+          }
+        }
+        if (result.length > 0) {
+          let searchObject = {
+            archiveVersion: lib.archiveVersion,
+            fileHash: lib.fileHash,
+            formatVersion: lib.formatVersion,
+            id: lib.id,
+            name: lib.name,
+            sections: result
+          };
+          search.push(searchObject);
+        }
         return search;
       }, []);
+      this.processData(searchResult);
+      this.calcScrollRecords();
     }
   },
   mounted() {
@@ -123,7 +171,7 @@ export default {
     };
     window.progress = function(progress) {
       _this.progress = progress;
-      if(!_this.loading){
+      if (!_this.loading) {
         _this.loading = true;
       }
     };
@@ -148,19 +196,24 @@ export default {
         });
 
         //1.iOS/1.Bars/1.Status Bar/Light Status Bar
+        console.log(lib.sections.length);
         lib.menu = lib.sections.reduce((menu, item) => {
-          let names = item.name.split("/");
+          let name = item.name.replace(/([^<])\//gi, '$1#');
+          let names = name.split('#');
           if (names.length === 0) return;
           if (!menu[names[0]]) menu[names[0]] = {};
-          if (!menu[names[0]][names[1]]) {
-            menu[names[0]][names[1]] = [];
-          } else {
-            menu[names[0]][names[1]].push(item);
-          }
+          if (!menu[names[0]][names[1]]) menu[names[0]][names[1]] = [];
+          menu[names[0]][names[1]].push(item);
+
           return menu;
         }, {});
       });
+
+      if(this.originLibraries.length === 0 && libraries.length!== 0){
+        this.originLibraries = libraries;
+      }
       this.libraries = libraries;
+      console.log(libraries);
     },
     dragSymbol(ev, section) {
       // console.log('hello');
@@ -184,7 +237,6 @@ export default {
       document.querySelector(".symbol__list").scrollTop = scrollTop;
     },
     calcScrollRecords() {
-      if (this.scrollRecord[this.currentLibrary]) return;
       let mapScroll = {};
       this.$nextTick(() => {
         document

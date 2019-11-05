@@ -65,7 +65,7 @@ class UIKit {
       frame: false,
       acceptsFirstMouse: true,
       webPreferences: {
-        devTools: false
+        // devTools: false
       }
     });
 
