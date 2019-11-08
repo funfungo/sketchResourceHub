@@ -26,6 +26,18 @@
       }
     },
     {
+      "name": "设计稿",
+      "identifier": "miaow.my-OpenSketch-identifier",
+      "script": "./OpenSketch.js",
+      "shortcut": "",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    },
+    {
       "name": "上传 SKETCH",
       "identifier": "miaow.my-UploadSketch-identifier",
       "script": "./UploadSketch.js",
@@ -55,6 +67,7 @@
     "items": [
       "miaow.my-UploadIcon-identifier",
       "miaow.my-IconList-identifier",
+      "miaow.my-OpenSketch-identifier",
       "miaow.my-UploadSketch-identifier",
       "miaow.my-SyncSketch-identifier"
     ]

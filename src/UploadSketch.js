@@ -11,14 +11,17 @@ import { generateHtml } from './GenerateHtml';
 const webviewIdentifier = 'sketchresourcehub.webview';
 
 export default function() {
+
   var document = require('sketch/dom').getSelectedDocument();
   var Document = require('sketch/dom').Document;
   var SketchName = '';
   if(document.path == undefined){
     SketchName = '未命名';
+    return;
   }else{
     SketchName = decodeURIComponent(document.path.substr(document.path.lastIndexOf('/')+1)).replace('.sketch','');
   }
+  var path = decodeURIComponent(document.path);
   var basePath = '/tmp/' + SketchName + '/';
   var zipUrl = basePath.substr(0,basePath.length-1) + '.zip';
 
@@ -57,7 +60,12 @@ export default function() {
     util.mkdirpSync(basePath + 'sketch/');
     util.mkdirpSync(basePath + 'html/');
     var sketchFileUrl = basePath + 'sketch/' + SketchName + '.sketch';
-    util.saveSketchFile(sketchFileUrl ,() => {
+    util.saveSketchFile([path,sketchFileUrl]).then(() => {
+      const fileHash = String(
+        NSFileManager.defaultManager()
+          .contentsAtPath(sketchFileUrl)
+          .sha1AsString()
+      );
       var symbols = util.findPagesMaster(context);
       util.mkdirpSync(basePath + 'symbolpng');
       util.mkdirpSync(basePath + 'symbolsvg');
@@ -69,7 +77,7 @@ export default function() {
         util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
           var data = util.encodeBase64(zipUrl);
           webContents
-          .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data})})`)
+          .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data,Md5:fileHash})})`)
           .catch(console.error);
         });
       });
@@ -88,7 +96,7 @@ export default function() {
     browserWindow.close();
   });
 
-  browserWindow.loadURL('http://wedesign.oa.com/UploadSketch?sketch=1');
+  browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
 }
 
 export function onShutdown() {

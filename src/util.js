@@ -99,12 +99,17 @@ export function findPagesMaster(context) {
   var ret = [];
   var symbols = page.layers();
   for (var k = 0; k < symbols.count(); k++) {
-    var s = symbols.objectAtIndex(k).layers();
-    for(var i = 0; i <s.count(); i++){
-      if(s.objectAtIndex(i).className() == 'MSSymbolInstance'){
-        ret.push(s.objectAtIndex(i));
+    if(symbols.objectAtIndex(k).className() == 'MSArtboardGroup'){
+      var s = symbols.objectAtIndex(k).layers();
+      for(var i = 0; i <s.count(); i++){
+        if(s.objectAtIndex(i).className() == 'MSSymbolInstance'){
+          ret.push(s.objectAtIndex(i));
+        }
       }
+    }else if(symbols.objectAtIndex(k).className() == 'MSSymbolInstance'){
+      ret.push(symbols.objectAtIndex(k))
     }
+    
   }
   return ret;
 }
@@ -115,14 +120,30 @@ export function encodeBase64(filePath) {
   return SketchContent;
 }
 
-export function saveSketchFile(filePath,func) {
- var document = require('sketch/dom').getSelectedDocument();
-  var Document = require('sketch/dom').Document;
-  document.save(filePath,{
-    saveMode: Document.SaveMode.SaveTo
-  }, ()=> {
-    func();
-  })
+export function saveSketchFile(args) {
+ // var document = require('sketch/dom').getSelectedDocument();
+ //  var Document = require('sketch/dom').Document;
+ //  document.save(filePath,{
+ //    saveMode: Document.SaveMode.SaveTo
+ //  }, ()=> {
+ //    func();
+ //  })
+
+  return new Promise((resolve, reject) => {
+    const task = child_process.spawn('cp', [
+      args[0],
+      args[1]
+    ]);
+    task.stdout.on('data', data => {
+      console.log(`stdout: ${data}`);
+    });
+    task.stderr.on('data', data => {
+      console.error(`stderr: ${data}`);
+    });
+    task.on('close', resolve);
+    task.on('exit', resolve);
+    task.on('error', reject);
+  });
 }
 
 export function zipSketch(args) {
@@ -149,7 +170,6 @@ export function zipSketch(args) {
 // zip(['-q','-r','-m','-o','-j','/Users/liuxinyu/Desktop/123.zip','/Users/liuxinyu/Desktop/123'])
 export function zip(args) {
   args = ['-q','-r','-m'].concat(args);
-  console.log(args);
   var task = NSTask.alloc().init();
   task.setLaunchPath("/usr/bin/zip");
   task.setArguments(args);
