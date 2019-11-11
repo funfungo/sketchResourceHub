@@ -16,7 +16,7 @@
           <div class="symbol__search-cancel" v-if="searchText.length > 0" @click="searchText = ''"></div>
         </div>
       </div>
-      <div class="symbol__empty" v-if="libraries.length === 0">无组件库</div>
+      <div class="symbol__empty" v-if="libraries.length === 0">空</div>
       <div class="symbol__main" v-else>
         <div class="symbol__menu">
           <div class="symbol__menu-section" v-if="searchText.length !== 0">
@@ -129,6 +129,7 @@ export default {
     searchText: function(val) {
       if (val.length == 0) {
         this.libraries = this.originLibraries;
+        this.calcScrollRecords();
         return;
       }
       let searchResult = this.originLibraries.reduce((search, lib) => {
@@ -290,23 +291,6 @@ export default {
     }
   }
 };
-// console.log($vm.searchText);
-// Vue.component("hilitext", {
-//   template: `<div v-html="highlight(text, $vm.searchText)"></div>`,
-//   props: ["text"],
-//   methods: {
-//     highlight: (text, query) => {
-//       if (!query) {
-//         return text;
-//       }
-
-//       return String(text || "").replace(
-//         this.regexForSearchText(query),
-//         hiliteReplacer_
-//       );
-//     }
-//   }
-// });
 </script>
 
 <style lang="less">

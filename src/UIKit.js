@@ -92,8 +92,11 @@ class UIKit {
         NSWindowAbove
       );
     });
-
-    this.browserWindow.loadURL("../Resources/pages/symbol-master/index.html");
+    this.browserWindow.loadURL(
+      String(
+        this.context.plugin.urlForResourceNamed("pages/symbol-master/index.html")
+      )
+    );
     this.setPersistedObj(this.browserWindow);
   }
 
