@@ -8,14 +8,17 @@
         </div>
       </div>
     </div>
+
     <div class="symbol__container" v-else>
-      <div class="symbol__search"  data-app-region="drag">
+      <div class="symbol__search" data-app-region="drag">
         <!-- <span class="symbol__search-label">搜索</span> -->
         <div class="symbol__search-box">
           <input type="text" v-model="searchText" />
           <div class="symbol__search-cancel" v-if="searchText.length > 0" @click="searchText = ''"></div>
         </div>
       </div>
+      <symbol-list :menu="currentLibrary.menu"></symbol-list>
+
       <div class="symbol__empty" v-if="libraries.length === 0">空</div>
       <div class="symbol__main" v-else>
         <div class="symbol__menu">
@@ -101,7 +104,11 @@
 
 <script>
 import mockData from "../../mock.json";
+import SymbolList from "./components/symbol-list.vue";
 export default {
+  components: {
+    SymbolList
+  },
   data() {
     return {
       devWeb: true,
@@ -196,11 +203,9 @@ export default {
           return a.name.localeCompare(b.name);
         });
 
-        //1.iOS/1.Bars/1.Status Bar/Light Status Bar
-        console.log(lib.sections.length);
         lib.menu = lib.sections.reduce((menu, item) => {
-          let name = item.name.replace(/([^<])\//gi, '$1#');
-          let names = name.split('#');
+          let name = item.name.replace(/([^<])\//gi, "$1#");
+          let names = name.split("#");
           if (names.length === 0) return;
           if (!menu[names[0]]) menu[names[0]] = {};
           if (!menu[names[0]][names[1]]) menu[names[0]][names[1]] = [];
@@ -208,16 +213,40 @@ export default {
 
           return menu;
         }, {});
+        // lib.menu =  this.processMenu({}, lib.sections);
       });
 
-      if(this.originLibraries.length === 0 && libraries.length!== 0){
+      if (this.originLibraries.length === 0 && libraries.length !== 0) {
         this.originLibraries = libraries;
       }
       this.libraries = libraries;
       console.log(libraries);
     },
+    processMenu(menu = {}, sections, level = 3) {
+      while (level) {
+        level--;
+        if(sections === undefined) return;
+        sections.forEach(item => {
+          let names = item.name.replace(/([^<])\//gi, "$1#").split("#");
+          let key = names[0];
+          if (!menu[key]) {
+            menu[key] = {};
+            menu[key].section = [];
+          }
+          names.shift(0);
+          let subname = names.join("/");
+          let newItem = Object.assign({}, item);
+          newItem.name = subname;
+          menu[key].section.push(newItem);
+        });
+
+        for(let key in menu){
+          this.processMenu(menu[key], menu[key].section, level);
+        }
+      }
+      return menu;
+    },
     dragSymbol(ev, section) {
-      // console.log('hello');
       let rect = ev.target.getBoundingClientRect();
       rect = {
         x: rect.left,
