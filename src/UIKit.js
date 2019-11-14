@@ -15,10 +15,9 @@ const document = context.document;
 const selection = context.selection;
 let layer;
 
+//
+const Library = require("sketch/dom").Library;
 const THREAD_DICT_KEY = "WeuiUIKit.BrowserWindow";
-
-
-
 
 
 export default function() {
@@ -62,7 +61,8 @@ class UIKit {
       height: 600,
       show: false,
       alwaysOnTop: true,
-      frame: false,
+      movable: true,
+      titleBarStyle: 'hiddenInset',
       acceptsFirstMouse: true,
       webPreferences: {
         // devTools: false
@@ -78,7 +78,7 @@ class UIKit {
     });
 
     this.browserWindow.on("blur", () => {
-      this.browserWindow.close();
+      // this.browserWindow.close();
     });
 
     this.browserWindow.setResizable(false);
@@ -141,9 +141,9 @@ class UIKit {
    * Triggers the beginning of a drag operation on the given sticker ID
    */
   startDragging(libraryId, symbolName, archiveVersion, stickerId, rect, srcView) {
-    let libs = require('sketch/dom').getLibraries();
+    // get target library element
+    let libs = Library.getLibraries();
     let libraryJS = libs.filter(lib => lib.id === libraryId)[0];
-    console.log(libraryJS);
 
     // let library = libraries.getLibraryById(libraryId, { onlyEnabled: true });
     let image = NSImage.alloc().initWithContentsOfFile(

@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="symbol__container" v-else>
-      <div class="symbol__search">
+      <div class="symbol__search"  data-app-region="drag">
         <!-- <span class="symbol__search-label">搜索</span> -->
         <div class="symbol__search-box">
           <input type="text" v-model="searchText" />
