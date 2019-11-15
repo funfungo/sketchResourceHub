@@ -161,7 +161,31 @@ li {
       border-top: none;
     }
   }
+  ul{
+    margin-left: 15px;
+    color: var(--c-color-desc);
+  }
+
+  &.folder{
+    .symbol__menu-item-title{
+      &::before{
+        content: '>'
+      }
+    }
+  }
+
+  &.active{
+    &.folder{
+      .symbol__menu-item-title{
+        &::before{
+          transform: rotate(-90deg);
+        }
+      }
+    }
+  }
+
 }
+
 
 .symbol__menu-item-title {
   padding: 0 10px;
@@ -173,8 +197,7 @@ li {
 }
 
 .symbol__submenu {
-  margin-left: 15px;
-  color: var(--c-color-desc);
+
 
   li {
     padding: 0 10px;
