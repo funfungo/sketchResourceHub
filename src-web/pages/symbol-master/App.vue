@@ -8,15 +8,16 @@
         </div>
       </div>
     </div>
+
     <div class="symbol__container" v-else>
-      <div class="symbol__search">
+      <div class="symbol__search" data-app-region="drag">
         <!-- <span class="symbol__search-label">搜索</span> -->
         <div class="symbol__search-box">
           <input type="text" v-model="searchText" />
           <div class="symbol__search-cancel" v-if="searchText.length > 0" @click="searchText = ''"></div>
         </div>
       </div>
-      <div class="symbol__empty" v-if="libraries.length === 0">无组件库</div>
+      <div class="symbol__empty" v-if="libraries.length === 0">空</div>
       <div class="symbol__main" v-else>
         <div class="symbol__menu">
           <div class="symbol__menu-section" v-if="searchText.length !== 0">
@@ -39,7 +40,13 @@
             >{{lib.name}}</div>
           </div>
           <div class="symbol__menu-head">
-            <ul>
+            <symbol-menu
+              v-if="libraries[currentLibrary]"
+              :menu="libraries[currentLibrary].menu"
+              :maxLevel="3"
+            ></symbol-menu>
+
+            <!-- <ul>
               <li
                 class="symbol__menu-item"
                 v-for="(list, key) of libraries[currentLibrary].menu"
@@ -65,7 +72,7 @@
                   >{{subkey}}</li>
                 </ul>
               </li>
-            </ul>
+            </ul>-->
           </div>
         </div>
         <div class="symbol__list" v-if="libraries[currentLibrary]" @scroll="onScrollList">
@@ -101,7 +108,13 @@
 
 <script>
 import mockData from "../../mock.json";
+import SymbolList from "./components/symbol-list.vue";
+import SymbolMenu from "./components/symbol-menu.vue";
 export default {
+  components: {
+    SymbolList,
+    SymbolMenu
+  },
   data() {
     return {
       devWeb: true,
@@ -129,6 +142,7 @@ export default {
     searchText: function(val) {
       if (val.length == 0) {
         this.libraries = this.originLibraries;
+        this.calcScrollRecords();
         return;
       }
       let searchResult = this.originLibraries.reduce((search, lib) => {
@@ -194,29 +208,36 @@ export default {
         lib.sections.sort((a, b) => {
           return a.name.localeCompare(b.name);
         });
-
-        //1.iOS/1.Bars/1.Status Bar/Light Status Bar
-        console.log(lib.sections.length);
-        lib.menu = lib.sections.reduce((menu, item) => {
-          let name = item.name.replace(/([^<])\//gi, '$1#');
-          let names = name.split('#');
-          if (names.length === 0) return;
-          if (!menu[names[0]]) menu[names[0]] = {};
-          if (!menu[names[0]][names[1]]) menu[names[0]][names[1]] = [];
-          menu[names[0]][names[1]].push(item);
-
-          return menu;
-        }, {});
+        let menu = { sections: [] };
+        lib.sections.forEach(item => {
+          let names = item.name.replace(/([^<])\//gi, "$1#").split("#");
+          try {
+            this.processMenu(menu, item, names);
+          } catch (e) {
+            console.log("process error");
+          }
+        });
+        lib.menu = menu;
       });
 
-      if(this.originLibraries.length === 0 && libraries.length!== 0){
+      if (this.originLibraries.length === 0 && libraries.length !== 0) {
         this.originLibraries = libraries;
       }
       this.libraries = libraries;
-      console.log(libraries);
+    },
+    processMenu(menu, item, names) {
+      if (names.length === 1) {
+        menu.sections.push(item);
+      } else {
+        let key = names.splice(0, 1);
+        if (!menu[key]) {
+          menu[key] = {};
+          menu[key].sections = [];
+        }
+        this.processMenu(menu[key], item, names);
+      }
     },
     dragSymbol(ev, section) {
-      // console.log('hello');
       let rect = ev.target.getBoundingClientRect();
       rect = {
         x: rect.left,
@@ -290,23 +311,6 @@ export default {
     }
   }
 };
-// console.log($vm.searchText);
-// Vue.component("hilitext", {
-//   template: `<div v-html="highlight(text, $vm.searchText)"></div>`,
-//   props: ["text"],
-//   methods: {
-//     highlight: (text, query) => {
-//       if (!query) {
-//         return text;
-//       }
-
-//       return String(text || "").replace(
-//         this.regexForSearchText(query),
-//         hiliteReplacer_
-//       );
-//     }
-//   }
-// });
 </script>
 
 <style lang="less">

@@ -15,7 +15,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --c-bg: #454647;
+    --c-bg: #2E2F30;
     --c-border: rgba(255, 255, 255, 0.1);
     --c-color: rgba(255, 255, 255, 0.9);
     --c-color-highlight: #06AE56;
@@ -29,7 +29,7 @@ body {
   background-color: var(--c-bg);
   -webkit-user-select: none;
   user-select: none;
-  font-family: "mp-quote", -apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif;
+  font-family: -apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif;
   overflow: hidden;
   color: var(--c-color);
 }
@@ -49,6 +49,8 @@ li {
   padding: 10px 10px;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  cursor: grab ;
 }
 
 .symbol__search-cancel {
@@ -159,7 +161,31 @@ li {
       border-top: none;
     }
   }
+  ul{
+    margin-left: 15px;
+    color: var(--c-color-desc);
+  }
+
+  &.folder{
+    .symbol__menu-item-title{
+      &::before{
+        content: '>'
+      }
+    }
+  }
+
+  &.active{
+    &.folder{
+      .symbol__menu-item-title{
+        &::before{
+          transform: rotate(-90deg);
+        }
+      }
+    }
+  }
+
 }
+
 
 .symbol__menu-item-title {
   padding: 0 10px;
@@ -171,8 +197,7 @@ li {
 }
 
 .symbol__submenu {
-  margin-left: 15px;
-  color: var(--c-color-desc);
+
 
   li {
     padding: 0 10px;
@@ -268,4 +293,5 @@ li {
 
 .symbol__search-result{
   display: flex;
+  flex: 1;
 }
