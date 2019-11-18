@@ -20,16 +20,9 @@ function writeDirectory(filePath) {
 
 export default function() {
   const options = {
-    parent: sketch.getSelectedDocument(),
-    modal: true,
     identifier: webviewIdentifier,
-    width: 600,
-    height: 460,
-    show: false,
-    frame: false,
-    titleBarStyle: 'hiddenInset',
-    minimizable: false,
-    maximizable: false
+    width: 900,
+    height: 600
   };
 
   const browserWindow = new BrowserWindow(options);
@@ -51,9 +44,12 @@ export default function() {
     var versionList = NSUserDefaults.standardUserDefaults().objectForKey(uiKitUrlKey) || {};
     delete obj['SketchContent'];
     versionList[obj.SketchName] = obj;
-    console.log(versionList);
     NSUserDefaults.standardUserDefaults().setObject_forKey(JSON.stringify(versionList), uiKitUrlKey);
+    webContents
+      .executeJavaScript(`successUpload(${JSON.stringify(versionList)})`)
+      .catch(console.error);
   });
+
   webContents.on('did-finish-load', () => {
     var versionList = JSON.parse(NSUserDefaults.standardUserDefaults().objectForKey(uiKitUrlKey)) || {};
     webContents
@@ -61,12 +57,14 @@ export default function() {
       .catch(console.error);
   });
 
+  
+
   webContents.on('closeWindow', s => {
     browserWindow.close();
   });
 
 
-  browserWindow.loadURL('http://localhost:8081/SyncSymbol?sketch=1');
+  browserWindow.loadURL('http://localhost:8081/SymbolList?sketch=1');
 }
 
 

@@ -30,7 +30,6 @@ export default function() {
   const webContents = browserWindow.webContents;
 
   webContents.on('did-finish-load', () => {
-    // UI.message('UI loaded!');
   });
 
   function chooseFilePath() {
@@ -95,7 +94,7 @@ export default function() {
   browserWindow.on('blur', () => {
     // browserWindow.close();
   });
-  var url = 'http://localhost:8081/SketchList??sketch=1&id=0';
+  var url = 'https://wedesign.oa.com/SketchList??sketch=1&id=0';
   browserWindow.loadURL(url);
 }
 

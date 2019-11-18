@@ -21,9 +21,7 @@ export default function() {
   }else{
     SketchName = decodeURIComponent(document.path.substr(document.path.lastIndexOf('/')+1)).replace('.sketch','');
   }
-  var path = decodeURIComponent(document.path);
-  var basePath = '/tmp/' + SketchName + '/';
-  var zipUrl = basePath.substr(0,basePath.length-1) + '.zip';
+  
 
   const options = {
     parent: sketch.getSelectedDocument(),
@@ -56,6 +54,10 @@ export default function() {
   });
 
   webContents.on('sketchUpload', s => {
+    SketchName = s;
+    var path = decodeURIComponent(document.path);
+    var basePath = '/tmp/' + SketchName + '/';
+    var zipUrl = basePath.substr(0,basePath.length-1) + '.zip';
     util.mkdirpSync(basePath);
     util.mkdirpSync(basePath + 'sketch/');
     util.mkdirpSync(basePath + 'html/');
@@ -96,7 +98,7 @@ export default function() {
     browserWindow.close();
   });
 
-  browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
 }
 
 export function onShutdown() {

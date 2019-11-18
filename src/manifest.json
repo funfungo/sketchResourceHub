@@ -2,6 +2,14 @@
   "version": "0.0.1",
   "commands": [
     {
+      "script" : "onAction.js",
+      "handlers" : {
+        "actions" : {
+          "OpenDocument" : "onOpenDocument"
+        }
+      }
+    },
+    {
       "name": "上传图标",
       "identifier": "miaow.my-UploadIcon-identifier",
   	  "script": "./UploadIcon.js",
