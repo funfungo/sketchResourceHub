@@ -43,7 +43,9 @@
             <symbol-menu
               v-if="libraries[currentLibrary]"
               :menu="libraries[currentLibrary].menu"
-              :maxLevel="3"
+              :maxLevel="menuLevel"
+              @menuRedirect="onMenuRedirect"
+              :current="currentSection"
             ></symbol-menu>
 
             <!-- <ul>
@@ -75,8 +77,9 @@
             </ul>-->
           </div>
         </div>
+
         <div class="symbol__list" v-if="libraries[currentLibrary]" @scroll="onScrollList">
-          <div
+          <!-- <div
             class="symbol__list-item"
             v-for="(list, key) of libraries[currentLibrary].menu"
             :key="key"
@@ -99,7 +102,13 @@
                 />
               </div>
             </div>
-          </div>
+          </div>-->
+
+          <symbol-list
+            :menu="libraries[currentLibrary].menu"
+            :maxLevel="menuLevel"
+            :devWeb="devWeb"
+          ></symbol-list>
         </div>
       </div>
     </div>
@@ -119,6 +128,7 @@ export default {
     return {
       devWeb: true,
       loading: false,
+      menuLevel: 3,
       info: {
         archiveVersion: mockData.libraries.archiveVersion || 0,
         fileHash: mockData.libraries.fileHash || "0",
@@ -259,30 +269,42 @@ export default {
     },
     calcScrollRecords() {
       let mapScroll = {};
+      // this.$nextTick(() => {
+      //   document
+      //     .querySelectorAll(".symbol__sublist-container")
+      //     .forEach(item => {
+      //       let [a, b] = item.id.split("_");
+      //       mapScroll[item.id] = item.offsetTop;
+      //     });
+      //   if (Object.keys(mapScroll).length > 0) {
+      //     this.scrollRecord[this.currentLibrary] = mapScroll;
+      //   }
+      // });
+
       this.$nextTick(() => {
-        document
-          .querySelectorAll(".symbol__sublist-container")
-          .forEach(item => {
-            let [a, b] = item.id.split("_");
-            mapScroll[item.id] = item.offsetTop;
-          });
+        document.querySelectorAll(".menu__level0").forEach(item => {
+          mapScroll[item.id] = item.offsetTop;
+        });
+
         if (Object.keys(mapScroll).length > 0) {
           this.scrollRecord[this.currentLibrary] = mapScroll;
         }
+
+        console.log(mapScroll);
+
       });
+
     },
     onScrollList(e) {
       if (!this.disableScrollListener) {
         let secIndex = Object.keys(
           this.scrollRecord[this.currentLibrary]
-        ).findIndex(key => {
+        ).find(key => {
           return (
             this.scrollRecord[this.currentLibrary][key] >= e.target.scrollTop
           );
         });
-        this.currentSection = Object.keys(
-          this.scrollRecord[this.currentLibrary]
-        )[secIndex - 1];
+        this.currentSection = secIndex;
       } else {
         this.disableScrollListener = false;
       }
@@ -308,6 +330,9 @@ export default {
       );
       let url = canvas.toDataURL();
       return url;
+    },
+    onMenuRedirect(menuItem){
+      this.changeSection(menuItem);
     }
   }
 };

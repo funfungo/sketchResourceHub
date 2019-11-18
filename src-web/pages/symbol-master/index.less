@@ -156,6 +156,7 @@ li {
 }
 
 .symbol__menu-item {
+  cursor: pointer;
   &:first-child {
     .symbol__menu-item-title {
       border-top: none;
@@ -165,25 +166,21 @@ li {
     margin-left: 15px;
     color: var(--c-color-desc);
   }
-
-  &.folder{
-    .symbol__menu-item-title{
-      &::before{
-        content: '>'
-      }
+  &.folder > .symbol__menu-item-title{
+    &::before{
+      content: '\203A';
+      display: inline-block;
+      margin: 5px;
     }
   }
-
-  &.active{
-    &.folder{
-      .symbol__menu-item-title{
-        &::before{
-          transform: rotate(-90deg);
-        }
-      }
+  &.folder.active > .symbol__menu-item-title{
+    &::before{
+      transform: rotate(90deg);
     }
   }
-
+  &.active:not(.folder){
+    color: var(--c-color-highlight);
+  }
 }
 
 
