@@ -60,7 +60,6 @@ export default {
   watch: {
     current: function(newVal, oldVal) {
       if (newVal !== oldVal) {
-
         let levels = newVal.split("-");
         let currLevel = levels[0];
         levels.splice(0, 1);
@@ -84,7 +83,10 @@ export default {
         copy[key] = copy[key] ? false : true;
         this.menuStatus = copy;
       } else {
-        this.dispatch("menuRedirect", this.parent + "-" + key);
+        this.dispatch(
+          "menuRedirect",
+          this.parent ? this.parent + "-" + key : key
+        );
       }
     },
     isFolder: function(item) {
