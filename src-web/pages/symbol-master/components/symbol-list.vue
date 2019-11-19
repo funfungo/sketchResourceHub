@@ -9,6 +9,7 @@
           :width="item.width"
           :height="item.height"
           :style="'background-color: rgba(' + item.bgColor + ')'"
+          @mousedown="dragSymbol($event, item)"
         />
       </div>
     </div>
@@ -78,7 +79,17 @@ export default {
     isSection() {
       if(maxLevel === 0 || Object.keys(this.activeMenu).length === 0) return true;
       return false;
-    }
+    },
+    dragSymbol(ev, section) {
+      let rect = ev.target.getBoundingClientRect();
+      rect = {
+        x: rect.left,
+        y: rect.top,
+        width: rect.right - rect.left,
+        height: rect.bottom - rect.top
+      };
+      window.postMessage("startDragging", section, rect);
+    },
   }
 };
 </script>
