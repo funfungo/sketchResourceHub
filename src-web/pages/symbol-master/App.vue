@@ -43,7 +43,10 @@
             <symbol-menu
               v-if="libraries[currentLibrary]"
               :menu="libraries[currentLibrary].menu"
-              :maxLevel="3"
+              :maxLevel="menuLevel"
+              @menuRedirect="onMenuRedirect"
+              :current="currentSection"
+              :search="searchText.length !== 0"
             ></symbol-menu>
 
             <!-- <ul>
@@ -75,8 +78,9 @@
             </ul>-->
           </div>
         </div>
+
         <div class="symbol__list" v-if="libraries[currentLibrary]" @scroll="onScrollList">
-          <div
+          <!-- <div
             class="symbol__list-item"
             v-for="(list, key) of libraries[currentLibrary].menu"
             :key="key"
@@ -99,7 +103,14 @@
                 />
               </div>
             </div>
-          </div>
+          </div>-->
+
+          <symbol-list
+            :menu="libraries[currentLibrary].menu"
+            :maxLevel="menuLevel"
+            :devWeb="devWeb"
+            :search="searchText.length !== 0"
+          ></symbol-list>
         </div>
       </div>
     </div>
@@ -119,6 +130,7 @@ export default {
     return {
       devWeb: true,
       loading: false,
+      menuLevel: 2,
       info: {
         archiveVersion: mockData.libraries.archiveVersion || 0,
         fileHash: mockData.libraries.fileHash || "0",
@@ -237,16 +249,6 @@ export default {
         this.processMenu(menu[key], item, names);
       }
     },
-    dragSymbol(ev, section) {
-      let rect = ev.target.getBoundingClientRect();
-      rect = {
-        x: rect.left,
-        y: rect.top,
-        width: rect.right - rect.left,
-        height: rect.bottom - rect.top
-      };
-      window.postMessage("startDragging", section, rect);
-    },
     changeLibrary(i) {
       this.currentLibrary = i;
       this.calcScrollRecords();
@@ -259,55 +261,33 @@ export default {
     },
     calcScrollRecords() {
       let mapScroll = {};
+
       this.$nextTick(() => {
-        document
-          .querySelectorAll(".symbol__sublist-container")
-          .forEach(item => {
-            let [a, b] = item.id.split("_");
-            mapScroll[item.id] = item.offsetTop;
-          });
+        document.querySelectorAll(".menu__level0").forEach(item => {
+          mapScroll[item.id] = item.offsetTop;
+        });
         if (Object.keys(mapScroll).length > 0) {
           this.scrollRecord[this.currentLibrary] = mapScroll;
         }
       });
+
     },
     onScrollList(e) {
       if (!this.disableScrollListener) {
         let secIndex = Object.keys(
           this.scrollRecord[this.currentLibrary]
-        ).findIndex(key => {
+        ).find(key => {
           return (
             this.scrollRecord[this.currentLibrary][key] >= e.target.scrollTop
           );
         });
-        this.currentSection = Object.keys(
-          this.scrollRecord[this.currentLibrary]
-        )[secIndex - 1];
+        this.currentSection = secIndex;
       } else {
         this.disableScrollListener = false;
       }
     },
-    requestLayerImageUrl(symbol) {
-      let canvas = document.createElement("canvas");
-      canvas.width = symbol.width * 2;
-      canvas.height = symbol.height * 2;
-      let ctx = canvas.getContext("2d");
-      ctx.scale(2, 2);
-      ctx.fillStyle = "#3F51B5";
-      ctx.fillRect(0, 0, symbol.width, symbol.height);
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font =
-        Math.ceil(Math.max(13, Math.min(symbol.width, symbol.height) / 10)) +
-        "px Menlo";
-      ctx.fillStyle = "rgba(255,255,255,.6)";
-      ctx.fillText(
-        `${symbol.width}x${symbol.height}`,
-        symbol.width / 2,
-        symbol.height / 2
-      );
-      let url = canvas.toDataURL();
-      return url;
+    onMenuRedirect(menuItem){
+      this.changeSection(menuItem);
     }
   }
 };
