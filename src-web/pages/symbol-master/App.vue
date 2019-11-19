@@ -130,7 +130,7 @@ export default {
     return {
       devWeb: true,
       loading: false,
-      menuLevel: 1,
+      menuLevel: 2,
       info: {
         archiveVersion: mockData.libraries.archiveVersion || 0,
         fileHash: mockData.libraries.fileHash || "0",
