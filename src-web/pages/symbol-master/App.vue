@@ -46,6 +46,7 @@
               :maxLevel="menuLevel"
               @menuRedirect="onMenuRedirect"
               :current="currentSection"
+              :search="searchText.length !== 0"
             ></symbol-menu>
 
             <!-- <ul>
@@ -108,6 +109,7 @@
             :menu="libraries[currentLibrary].menu"
             :maxLevel="menuLevel"
             :devWeb="devWeb"
+            :search="searchText.length !== 0"
           ></symbol-list>
         </div>
       </div>
@@ -128,7 +130,7 @@ export default {
     return {
       devWeb: true,
       loading: false,
-      menuLevel: 3,
+      menuLevel: 5,
       info: {
         archiveVersion: mockData.libraries.archiveVersion || 0,
         fileHash: mockData.libraries.fileHash || "0",

@@ -1,8 +1,9 @@
 <template>
-  <div :id="parent" :class="'menu__level' + maxLevel">
+  <div :id="parent" :class="isSection?'menu__level0':''">
     <div v-if="menu.sections.length > 0">
       <div v-for="(item,i) in menu.sections" :key="i">
-        <div class="symbol__item-title">{{item.name}}</div>
+        <div class="symbol__item-title" v-if="search" v-html="item.name">{{item.name}}</div>
+        <div class="symbol__item-title" v-else>{{item.name}}</div>
         <img
           :src="devWeb ? requestLayerImageUrl(item) : 'file://' + item.imagePath"
           :width="item.width"
@@ -12,7 +13,13 @@
       </div>
     </div>
     <div v-for="(item, key) in activeMenu" :key="key">
-      <symbol-list :menu="item" :maxLevel="maxLevel-1" :devWeb="devWeb" :parent="parent ? parent + '-' + key : key"></symbol-list>
+      <symbol-list
+        :menu="item"
+        :maxLevel="maxLevel-1"
+        :devWeb="devWeb"
+        :parent="parent ? parent + '-' + key : key"
+        :search="search"
+      ></symbol-list>
     </div>
   </div>
 </template>
@@ -27,6 +34,10 @@ export default {
     parent: {
       type: String,
       default: ""
+    },
+    search: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -63,6 +74,10 @@ export default {
       );
       let url = canvas.toDataURL();
       return url;
+    },
+    isSection() {
+      if(maxLevel === 0 || Object.keys(this.activeMenu).length === 0) return true;
+      return false;
     }
   }
 };
