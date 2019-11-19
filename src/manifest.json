@@ -68,6 +68,18 @@
           "Shutdown": "onShutdown"
         }
       }
+    },
+    {
+      "name": "工具栏",
+      "identifier": "miaow.my-ToolBar-identifier",
+      "script": "./ToolBar.js",
+      "shortcut": "",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
     }
   ],
   "menu": {
@@ -77,7 +89,8 @@
       "miaow.my-IconList-identifier",
       "miaow.my-OpenSketch-identifier",
       "miaow.my-UploadSketch-identifier",
-      "miaow.my-SyncSketch-identifier"
+      "miaow.my-SyncSketch-identifier",
+      "miaow.my-ToolBar-identifier"
     ]
   }
 }

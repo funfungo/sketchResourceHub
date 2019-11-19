@@ -1,103 +1,132 @@
-@import "toolbar.js";
-@import "checkForUpdate.js";
-@import "common.js"
-
 var selectionDom = "com.sketchplugins.wechat.selectionDom";
-var selectionDom1 = "com.sketchplugins.wechat.selectionDom1";
-var selectionDom2 = "com.sketchplugins.wechat.selectionDom2";
-var toolbarAutoShow = "com.sketchplugins.wechat.toolbarautoshow";
+var toolbarAutoShow = "com.sketchplugins.wechat.toolbarautoshow1";
 var updateAutoShow = "com.sketchplugins.wechat.updateAutoShow";
 
-var onSelectionChanged = function (context) {
-    var action = context.actionContext;
-    var document = action.document;
-    var selection = action.newSelection;
+import * as fs from '@skpm/fs';
 
-    var count = selection.count();
-    var message = '';
-    var saveMessage = [];
+import BrowserWindow from 'sketch-module-web-view';
+import { getWebview } from 'sketch-module-web-view/remote';
+import UI from 'sketch/ui';
+import sketch from 'sketch';
+var Library = require('sketch/dom').Library;
 
-    if (count == 1 || count == 2) {
-        var oldSelection = NSUserDefaults.standardUserDefaults().objectForKey(selectionDom) || '';
-        if (count == 1) {
-            message = selection[0].objectID();
-            context.command.setValue_forKey_onLayer_forPluginIdentifier(selection[0].objectID(), "selection1", selection[0], selectionDom1);
-        } else if (count == 2) {
-            for (var i = 0; i < count; i++) {
-                if (oldSelection == selection[i].objectID()) {
-                    saveMessage.unshift(selection[i]);
-                } else {
-                    saveMessage.push(selection[i]);
-                }
-            }
-            message = saveMessage[0].objectID() + ',' + saveMessage[1].objectID();
-        }
-        NSUserDefaults.standardUserDefaults().setObject_forKey(message, selectionDom);
-    }
-    if (saveMessage.length == 2) {
-        context.command.setValue_forKey_onLayer_forPluginIdentifier(saveMessage[0].objectID(), "selection1", saveMessage[0], selectionDom1);
-        context.command.setValue_forKey_onLayer_forPluginIdentifier(saveMessage[1].objectID(), "selection2", saveMessage[1], selectionDom2);
-    }
-};
+const webviewIdentifier = 'sketchresourcehub.webview';
+const document = context.document;
+const selection = context.selection;
+var layer;
+var uiKitUrlKey = "com.sketchplugins.wechat.newuikiturl";
 
+function writeDirectory(filePath) {
+  NSFileManager
+    .defaultManager()
+    .createDirectoryAtPath_withIntermediateDirectories_attributes_error(filePath, true, nil, nil);
+}
 
+function networkRequest(args) {
+    var task = NSTask.alloc().init();
+    task.setLaunchPath("/usr/bin/curl");
+    task.setArguments(args);
+    var outputPipe = NSPipe.pipe();
+    task.setStandardOutput(outputPipe);
+    task.launch();
+    var responseData = outputPipe.fileHandleForReading().readDataToEndOfFile();
+    return responseData;
+}
 
-
-var onOpenDocument = function (context) {
+export default function() {
     var toolbarAuto = NSUserDefaults.standardUserDefaults().objectForKey(toolbarAutoShow) || '';
     if (toolbarAuto != 'false') {
-        toolbar(context, true);
+        // toolbar(context, true);
     }
     var syncWeChatKey = 'com.sketchplugins.wechat.syncWeChatKey';
     var syncWeChatTime = 'com.sketchplugins.wechat.syncWeChatTime';
     var uiKitUrlKey = "com.sketchplugins.wechat.newuikiturl";
+
     var uiKitUrlSave = "com.sketchplugins.wechat.newuikitsaveurl";
     var uiKitLocalSave = 'com.sketchplugins.wechat.newuikitdatabasePath';
 
-    var url = NSUserDefaults.standardUserDefaults().objectForKey(uiKitUrlSave);
-    if(!url){
-        return;
+
+    // var time = NSUserDefaults.standardUserDefaults().objectForKey(syncWeChatTime);
+    // var myDate = new Date();
+    // var toDay = myDate.toLocaleDateString();
+    // if(toDay == time){
+    //     return;
+    // }else{
+    //     NSUserDefaults.standardUserDefaults().setObject_forKey(toDay, syncWeChatTime);
+    // }
+
+    var versionList = NSUserDefaults.standardUserDefaults().objectForKey(uiKitUrlKey) || '{}';
+    versionList = JSON.parse(versionList);
+    if(Object.keys(versionList).length == 0){
+    	return;
     }
 
-    var time = NSUserDefaults.standardUserDefaults().objectForKey(syncWeChatTime);
-    var myDate = new Date();
-    var toDay = myDate.toLocaleDateString();
-    if(toDay == time){
-        return;
-    }else{
-        NSUserDefaults.standardUserDefaults().setObject_forKey(toDay, syncWeChatTime);
-    }
 
+    var url = 'https://wedesign.oa.com/api/sketch/getSketchList?IsSymbol=1';
+    var openFlag = false;
 
-    var returnData = networkRequest([url.replace('.sketch','.json')]);
+    var returnData = networkRequest([url]);
+	var jsonData = NSString.alloc().initWithData_encoding(returnData,NSUTF8StringEncoding);
 
-    var jsonData = [[NSString alloc] initWithData: returnData encoding: NSUTF8StringEncoding];
     jsonData = JSON.parse(jsonData);
-    var currentVersion = jsonData.VERSION;
+
+    var message = jsonData.message;
+	message.forEach((symbol,item)=> {
+	  if(versionList && versionList[symbol.SketchName]){
+	    message[item].OldVersion = versionList[symbol.SketchName].Version;
+	    if(message[item].OldVersion != message[item].Version){
+	    	openFlag = true;
+	    }
+	  }
+	})
+
+	if(openFlag){
+		const options = {
+		    identifier: webviewIdentifier,
+		    width: 900,
+		    height: 600
+		};
+
+		const browserWindow = new BrowserWindow(options);
+
+		browserWindow.once('ready-to-show', () => {
+			browserWindow.show();
+		});
+
+		const webContents = browserWindow.webContents;
 
 
-    var version = NSUserDefaults.standardUserDefaults().objectForKey(syncWeChatKey);
-    if(version != currentVersion){
-        var updateAlert = dialog(context);
-        updateAlert.setMessageText('检查到有新的 libary，是否更新？');
-        updateAlert.setInformativeText('更新可能需要10-15秒下载文件');
-        updateAlert.addButtonWithTitle('确认');
-        updateAlert.addButtonWithTitle('取消');
-        var response = updateAlert.runModal();
-        if (response == "1000") {
-          NSUserDefaults.standardUserDefaults().setObject_forKey(currentVersion, syncWeChatKey);
-          function getUIKIT(content) {
-            var List = NSUserDefaults.standardUserDefaults().objectForKey(uiKitUrlKey) || getConfig('config', context).UIKIT;
-            return List;
-          };
-          var uikitList = getUIKIT(context);
-          var data = networkRequest([url]);
-          var save = NSSavePanel.savePanel();
-          var databasePath = NSUserDefaults.standardUserDefaults().objectForKey(uiKitLocalSave);
-          data = NSData.alloc().initWithData(data);
-          data.writeToFile_atomically(databasePath, true);
-          context.document.showMessage('导入成功，请在 Symbol 中使用您的 Library');
-        }
-    }
+		webContents.on('SymbolDownload', (obj) => {
+			var SketchContent = NSData.alloc().initWithBase64EncodedString_options(obj.SketchContent,0);
+			var basePath = '/Users/Shared/sketchFile/symbol/';
+			writeDirectory(basePath);
+			var dataPath = basePath + obj.SketchName + '.sketch';
+			SketchContent.writeToFile_atomically(dataPath, true);
+			var library = Library.getLibraryForDocumentAtPath(dataPath);
+			var versionList = NSUserDefaults.standardUserDefaults().objectForKey(uiKitUrlKey) || {};
+			delete obj['SketchContent'];
+			versionList[obj.SketchName] = obj;
+			NSUserDefaults.standardUserDefaults().setObject_forKey(JSON.stringify(versionList), uiKitUrlKey);
+			webContents
+			  .executeJavaScript(`successUpload(${JSON.stringify(versionList)})`)
+			  .catch(console.error);
+		});
+
+		webContents.on('did-finish-load', () => {
+			var versionList = JSON.parse(NSUserDefaults.standardUserDefaults().objectForKey(uiKitUrlKey)) || {};
+			webContents
+			  .executeJavaScript(`getSymbolList(${JSON.stringify(versionList)})`)
+			  .catch(console.error);
+			});
+
+
+
+			webContents.on('closeWindow', s => {
+			browserWindow.close();
+		});
+
+
+		browserWindow.loadURL('https://wedesign.oa.com/SymbolList?sketch=1');
+	}
 
 };
