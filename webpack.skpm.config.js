@@ -25,5 +25,8 @@ module.exports = function (config) {
         loader: "css-loader",
       },
     ]
-  })
+  }),
+  config.node = {
+    setImmediate: false, // <---- HERE
+  };
 }

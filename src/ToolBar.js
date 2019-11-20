@@ -24,11 +24,12 @@ function addButton(rect, name, callAction) {
 }
 
 function getImage(size, name) {
+    var pluginSketch = context.plugin.url().URLByAppendingPathComponent("Contents").URLByAppendingPathComponent("Resources").URLByAppendingPathComponent("toolbar");
     var isRetinaDisplay = NSScreen.mainScreen().backingScaleFactor() > 1 ? true : false;
     var suffix = isRetinaDisplay ? '@2x' : '';
-    var imageURL = pluginSketch.URLByAppendingPathComponent("toolbar").URLByAppendingPathComponent(name + '.png');
+    var imageURL = pluginSketch.URLByAppendingPathComponent(name + suffix + '.png');
     var image = NSImage.alloc().initWithContentsOfURL(imageURL);
-    return image
+    return image;
 }
 
 export default function() {
@@ -36,11 +37,12 @@ export default function() {
           splitView = contentView.subviews().objectAtIndex(0),
           newStackView = NSStackView.alloc().initWithFrame(NSMakeRect(0, 0, 100, 0))
        splitView.insertArrangedSubview_atIndex(newStackView, 2)
-
+   coscript.setShouldKeepAround(true);
    var closeButton = addButton(NSMakeRect(20, 53, 30, 30), "close",
         function (sender) {
-            UI.message('加载中...');
-            newStackView.removeFromSuperview()
+          coscript.setShouldKeepAround(false);
+          context.document.showMessage(1);
+          newStackView.removeFromSuperview()
             // if (toolbarAuto != 'false') {
             //     var settingsWindow = dialog(context);
             //     settingsWindow.addButtonWithTitle(i18.m1);

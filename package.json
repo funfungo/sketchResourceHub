@@ -14,25 +14,31 @@
     "sketch-assets-file": "sketch-assets/icons.sketch"
   },
   "scripts": {
-    "build": "skpm-build",
+    "build": "./skpm-build-web.js",
     "watch": "skpm-build --watch",
     "start": "skpm-build --watch",
-    "postinstall": "npm run build && skpm-link"
+    "postinstall": "npm run build && skpm-link",
+    "watch-web": "./skpm-build-web.js --watch"
   },
   "devDependencies": {
     "@skpm/builder": "^0.5.11",
     "@skpm/child_process": "^0.4.1",
+    "@skpm/events": "^0.2.0",
     "@skpm/extract-loader": "^2.0.2",
     "@skpm/fs": "^0.2.5",
     "@skpm/path": "^0.1.4",
+    "babel-polyfill": "^6.26.0",
     "css-loader": "^1.0.0",
-    "html-loader": "^0.5.1"
+    "html-loader": "^0.5.1",
+    "vue-loader": "^15.7.1"
   },
   "resources": [
     "resources/**/*.js"
   ],
   "dependencies": {
-    "sketch-module-web-view": "^3.0.1"
+    "html-webpack-plugin": "^3.2.0",
+    "sketch-module-web-view": "^3.0.1",
+    "webpack-glob-entry": "^2.1.1"
   },
   "author": "nikkifang doubleluo"
 }
