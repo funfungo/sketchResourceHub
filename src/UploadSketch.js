@@ -21,14 +21,14 @@ export default function() {
   }else{
     SketchName = decodeURIComponent(document.path.substr(document.path.lastIndexOf('/')+1)).replace('.sketch','');
   }
-  
+
 
   const options = {
     parent: sketch.getSelectedDocument(),
     modal: true,
     identifier: webviewIdentifier,
-    width: 600,
-    height: 530,
+    width: 500,
+    height: 800,
     show: false,
     frame: false,
     titleBarStyle: 'hiddenInset',
@@ -54,40 +54,41 @@ export default function() {
   });
 
   webContents.on('sketchUpload', s => {
-    SketchName = s;
-    var path = decodeURIComponent(document.path);
-    var basePath = '/tmp/' + SketchName + '/';
-    var zipUrl = basePath.substr(0,basePath.length-1) + '.zip';
-    util.mkdirpSync(basePath);
-    util.mkdirpSync(basePath + 'sketch/');
-    util.mkdirpSync(basePath + 'html/');
-    var sketchFileUrl = basePath + 'sketch/' + SketchName + '.sketch';
-    util.saveSketchFile([path,sketchFileUrl]).then(() => {
-      const fileHash = String(
-        NSFileManager.defaultManager()
-          .contentsAtPath(sketchFileUrl)
-          .sha1AsString()
-      );
-      var symbols = util.findPagesMaster(context);
-      util.mkdirpSync(basePath + 'symbolpng');
-      util.mkdirpSync(basePath + 'symbolsvg');
-      symbols.forEach((symbol,item) => {
-        util.captureLayerImage(context, symbol, basePath + 'symbolpng/' + symbol.name().replace(/\//ig,'_') + '.png');
-        util.captureLayerImage(context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig,'_') + '.svg', 'svg');
-      })
-      generateHtml(sketchFileUrl,basePath + 'html/').then(()=>{
-        util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
-          var data = util.encodeBase64(zipUrl);
-          webContents
-          .executeJavaScript(`callSketchUpload(${JSON.stringify({SketchContent:data,Md5:fileHash})})`)
-          .catch(console.error);
-        });
-      });
-      
-    });
+    console.log(s);
+    // SketchName = s;
+    // var path = decodeURIComponent(document.path);
+    // var basePath = '/tmp/' + SketchName + '/';
+    // var zipUrl = basePath.substr(0,basePath.length-1) + '.zip';
+    // util.mkdirpSync(basePath);
+    // util.mkdirpSync(basePath + 'sketch/');
+    // util.mkdirpSync(basePath + 'html/');
+    // var sketchFileUrl = basePath + 'sketch/' + SketchName + '.sketch';
+    // util.saveSketchFile([path,sketchFileUrl]).then(() => {
+    //   const fileHash = String(
+    //     NSFileManager.defaultManager()
+    //       .contentsAtPath(sketchFileUrl)
+    //       .sha1AsString()
+    //   );
+    //   var symbols = util.findPagesMaster(context);
+    //   util.mkdirpSync(basePath + 'symbolpng');
+    //   util.mkdirpSync(basePath + 'symbolsvg');
+    //   symbols.forEach((symbol,item) => {
+    //     util.captureLayerImage(context, symbol, basePath + 'symbolpng/' + symbol.name().replace(/\//ig,'_') + '.png');
+    //     util.captureLayerImage(context, symbol, basePath + 'symbolsvg/' + symbol.name().replace(/\//ig,'_') + '.svg', 'svg');
+    //   })
+    //   generateHtml(sketchFileUrl,basePath + 'html/').then(()=>{
+    //     util.zipSketch([zipUrl,basePath.substr(0,basePath.length-1)]).then(()=>{
+    //       var data = util.encodeBase64(zipUrl);
+    //       webContents
+    //       .executeJavaScript(`callSketchUpload(${JSON.stringify({sketchContent:data,md5:fileHash})})`)
+    //       .catch(console.error);
+    //     });
+    //   });
+
+    // });
   });
 
-  
+
   webContents.on('openURL', s => {
     util.openURL(s);
   });
@@ -98,8 +99,8 @@ export default function() {
     browserWindow.close();
   });
 
-  browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
-  // browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
+  // browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
 }
 
 export function onShutdown() {
