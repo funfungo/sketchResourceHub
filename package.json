@@ -18,7 +18,7 @@
     "watch": "skpm-build --watch",
     "start": "skpm-build --watch",
     "postinstall": "npm run build && skpm-link",
-    "watch-web": "./skpm-build-web.js --watch"
+    "watch-web": "NODE_ENV=development ./skpm-build-web.js --watch"
   },
   "devDependencies": {
     "@skpm/builder": "^0.5.11",

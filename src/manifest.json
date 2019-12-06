@@ -49,7 +49,7 @@
       "name": "上传 SKETCH",
       "identifier": "miaow.my-UploadSketch-identifier",
       "script": "./UploadSketch.js",
-      "shortcut": "",
+      "shortcut": "command shift ,",
       "handlers": {
         "run": "onRun",
         "actions": {
