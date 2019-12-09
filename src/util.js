@@ -29,13 +29,6 @@ export function loadDocFromSketchFile(filePath) {
   return doc;
 }
 
-export function getLayerImage(context, layer) {
-  let tempPath = NSTemporaryDirectory().stringByAppendingPathComponent(
-      NSUUID.UUID().UUIDString() + '.png');
-  captureLayerImage(context.document, layer, tempPath);
-  return NSImage.alloc().initWithContentsOfFile(tempPath);
-}
-
 export function captureLayerImage(context, layer, destPath, type) {
   let air = layer.absoluteInfluenceRect();
   let rect = NSMakeRect(air.origin.x, air.origin.y, air.size.width, air.size.height);
@@ -78,21 +71,7 @@ export function mkdirpSync(path, mode) {
   }
 }
 
-export function findSymbolMaster(context) {
-  var pages = context.document.pages();
-  var ret = [];
-  for (var i = 0; i < pages.count(); i++) {
-    if(pages.objectAtIndex(i).name() == 'Symbols'){
-      var symbols = pages.objectAtIndex(i).layers();
-      for (var k = 0; k < symbols.count(); k++) {
-        if(symbols.objectAtIndex(k).className() == 'MSSymbolMaster'){
-          ret.push(symbols.objectAtIndex(k));
-        }
-      }
-    }
-  }
-  return ret;
-}
+
 
 export function findPagesMaster(context) {
   var page = context.document.currentPage();
@@ -151,7 +130,6 @@ export function zipSketch(args) {
     const task = child_process.spawn('zip', [
       '-q',
       '-r',
-      '-m',
       args[0],
       args[1]
     ]);
