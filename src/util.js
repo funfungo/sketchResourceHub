@@ -167,6 +167,28 @@ export function zipSketch(args) {
   });
 }
 
+export function dialog(context) {
+    var iconImage = NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path());
+    var alert = COSAlertWindow.new();
+    if (iconImage) {
+        alert.setIcon(iconImage);
+    }
+    return alert;
+}
+
+export function errorDialog(context,content) {
+    var iconImage = NSImage.alloc().initByReferencingFile(context.plugin.urlForResourceNamed("icon.png").path());
+    var alert = COSAlertWindow.new();
+    if (iconImage) {
+        alert.setIcon(iconImage);
+    }
+    alert.addButtonWithTitle(_(context).checkForUpdate.m9);
+
+    alert.setMessageText(_(context).checkForUpdate.m10);
+    alert.setInformativeText(content);
+    return alert.runModal();
+}
+
 // zip(['-q','-r','-m','-o','-j','/Users/liuxinyu/Desktop/123.zip','/Users/liuxinyu/Desktop/123'])
 export function zip(args) {
   args = ['-q','-r','-m'].concat(args);

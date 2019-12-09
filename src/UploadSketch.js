@@ -98,8 +98,8 @@ export default function() {
     browserWindow.close();
   });
 
-  browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
-  // browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
+  // browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
+  browserWindow.loadURL('http://localhost:8081/UploadSketch?sketch=1');
 }
 
 export function onShutdown() {

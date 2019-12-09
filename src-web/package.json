@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev-web": "webpack-dev-server"
+    "dev-web": "NODE_ENV=development webpack-dev-server"
   },
   "author": "",
   "license": "ISC",
@@ -23,6 +23,8 @@
     "webpack-glob-entry": "^2.1.1"
   },
   "dependencies": {
+    "element-ui": "^2.13.0",
+    "file-loader": "^5.0.2",
     "vue": "^2.6.10"
   }
 }

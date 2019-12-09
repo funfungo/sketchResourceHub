@@ -10,6 +10,18 @@
       }
     },
     {
+      "name": "连线",
+      "identifier": "miaow.my-Link-identifier",
+      "script": "./Link.js",
+      "shortcut": "command 1",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    },
+    {
       "name": "上传图标",
       "identifier": "miaow.my-UploadIcon-identifier",
   	  "script": "./UploadIcon.js",
@@ -97,6 +109,7 @@
   "menu": {
     "title": "MiaoW",
     "items": [
+      "miaow.my-Link-identifier",
       "miaow.my-UploadIcon-identifier",
       "miaow.my-IconList-identifier",
       "miaow.my-OpenSketch-identifier",

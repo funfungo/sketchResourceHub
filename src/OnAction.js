@@ -62,7 +62,7 @@ export default function() {
     }
 
 
-    var url = 'https://wedesign.oa.com/api/sketch/getSketchList?IsSymbol=1';
+    var url = 'https://wedesign.oa.com/static/SymbolVersion.json';
     var openFlag = false;
 
     var returnData = networkRequest([url]);
