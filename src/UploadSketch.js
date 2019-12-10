@@ -41,13 +41,13 @@ export default function () {
 
   let previewObj = {
     documentId: documentId,
+    documentName: documentName,
     md5: "",
     selected: [],
     all: []
   };
   //先保存文件, 每次保存文件hash会变化
   document.save(err => {
-
     fileHash = String(
       NSFileManager.defaultManager()
       .contentsAtPath(decodeURIComponent(document.path))
@@ -203,6 +203,7 @@ export default function () {
   });
 
   webContents.on("closeWindow", s => {
+    NSFileManager.defaultManager().removeItemAtPath_error(tmpPath, nil);
     NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
     browserWindow.close();
   });
