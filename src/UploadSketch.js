@@ -104,7 +104,7 @@ export default function () {
 
   webContents.on("sketchUpload", s => {
     // 交互or视觉
-    let type = s.type || 1;
+    let type = s.type || 1; //1：交互 2：视觉
     // 选中页面or全部页面
     let selected = s.page || "selected";
     let sketchFileUrl = tmpPath + "/" + documentName;
@@ -132,31 +132,58 @@ export default function () {
     console.timeEnd("export");
 
 
-    if (type === 2) {
+    if (type == 2) {
       //TODO 设计稿导出标注
       //TODO 导出symbol icons
       let symbols = util.findPagesMaster(context);
       util.mkdirpSync(tmpPath + "/symbolpng");
       util.mkdirpSync(tmpPath + "/symbolsvg");
-    }
+      util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
+        console.time("generate");
+        generateHtml(sketchFileUrl, tmpPath + "/html").then(() => {
+          console.timeEnd("generate");
+          util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
+            // 压缩上传到web
+            util.zipSketch([zipUrl, tmpPath]).then(() => {
+              let data = util.encodeBase64(zipUrl);
+              webContents
+                .executeJavaScript(
+                  `callSketchUpload(${JSON.stringify({
+                  documentId: documentId,
+                  md5: fileHash,
+                  sketchContent: data,
+                  sketchName: documentName,
+                  imgIds: imgIds
+                })})`
+                )
+                .catch(console.error);
+            });
+          });
+        }).catch(err => {
+          console.log(err);
+        })
+      })
+    } else {
 
-    util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
-      // 压缩上传到web
-      util.zipSketch([zipUrl, tmpPath]).then(() => {
-        let data = util.encodeBase64(zipUrl);
-        webContents
-          .executeJavaScript(
-            `callSketchUpload(${JSON.stringify({
+      util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
+        // 压缩上传到web
+        util.zipSketch([zipUrl, tmpPath]).then(() => {
+          let data = util.encodeBase64(zipUrl);
+          webContents
+            .executeJavaScript(
+              `callSketchUpload(${JSON.stringify({
               documentId: documentId,
               md5: fileHash,
               sketchContent: data,
               sketchName: documentName,
               imgIds: imgIds
             })})`
-          )
-          .catch(console.error);
+            )
+            .catch(console.error);
+        });
       });
-    });
+    }
+
 
 
     // util.saveSketchFile([path, sketchFileUrl]).then(() => {

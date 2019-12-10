@@ -25,7 +25,7 @@ export function loadDocFromSketchFile(filePath) {
       NSURL.fileURLWithPath(filePath),
       'com.bohemiancoding.sketch.drawing',
       null);
-  
+
   return doc;
 }
 
@@ -88,7 +88,7 @@ export function findPagesMaster(context) {
     }else if(symbols.objectAtIndex(k).className() == 'MSSymbolInstance'){
       ret.push(symbols.objectAtIndex(k))
     }
-    
+
   }
   return ret;
 }
@@ -100,14 +100,6 @@ export function encodeBase64(filePath) {
 }
 
 export function saveSketchFile(args) {
- // var document = require('sketch/dom').getSelectedDocument();
- //  var Document = require('sketch/dom').Document;
- //  document.save(filePath,{
- //    saveMode: Document.SaveMode.SaveTo
- //  }, ()=> {
- //    func();
- //  })
-
   return new Promise((resolve, reject) => {
     const task = child_process.spawn('cp', [
       args[0],
