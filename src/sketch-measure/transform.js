@@ -1,4 +1,6 @@
-const { join } = require("path");
+const {
+  join
+} = require("path");
 const {
   toHex,
   convertRGBToHex,
@@ -62,7 +64,10 @@ function transformExportable(layer, result) {
  * @param  {Object} pos    parent layer's position
  * @return {Undefined}
  */
-function transformFrame(layer, result, { x, y }) {
+function transformFrame(layer, result, {
+  x,
+  y
+}) {
   const frame = layer.frame;
   result[frame._class] = {
     width: round(frame.width, 1),
@@ -251,12 +256,16 @@ function transformArtboard(artboard, pageMeta, extra, appVersion) {
   pageMeta.height = artboard.frame.height;
   // Set extra.layers, give other transform* functions a way to operate layers.
   extra.layers = pageMeta.layers;
-  extra.parentPos = { x: 0, y: 0 };
+  extra.parentPos = {
+    x: 0,
+    y: 0
+  };
   artboard.layers.forEach(l => {
     const layer = transformLayer(l, extra, appVersion);
     recursiveAppendLayers(layer, pageMeta.layers);
   });
   return pageMeta;
+
   function recursiveAppendLayers(layer, store) {
     const _appendLayers = layer && layer._appendLayers;
     if (!_appendLayers || !_appendLayers.length) {
@@ -366,16 +375,14 @@ function handleSymbol(layer, result, extra, appVersion) {
 }
 
 function handleText(layer, result, appVersion, textStyles) {
-  if (result.type !== "text") return;
 
+  if (result.type !== "text") return;
   const textInfo =
-    parseFloat(appVersion) >= 50
-      ? parseTextV50(layer, result)
-      : parseText(layer, result);
-  // If fills exists, we should not overwrite color.
-  if (!layer.style.fills) {
-    result.color = transformColor(textInfo.color);
-  }
+    parseFloat(appVersion) >= 50 ?
+    parseTextV50(layer, result) :
+    parseText(layer, result);
+
+  result.color = transformColor(textInfo.color);
   delete textInfo.color;
 
   if (textStyles.length > 0 && layer.sharedStyleID) {
@@ -399,7 +406,10 @@ function transformCSSRadius(radius) {
 
 function transformCSSBorder(border) {
   if (border && border.length) {
-    const { thickness, color } = border[0];
+    const {
+      thickness,
+      color
+    } = border[0];
 
     return `border: ${thickness}px solid ${transformCSSColor(color)};`;
   }
@@ -407,7 +417,9 @@ function transformCSSBorder(border) {
 
 function transformCSSBackground(fills) {
   if (fills && fills.length) {
-    const { color } = fills[0];
+    const {
+      color
+    } = fills[0];
 
     return `background: ${transformCSSColor(color)};`;
   }
@@ -415,7 +427,12 @@ function transformCSSBackground(fills) {
 
 function transformCSSShadow(shadows) {
   if (shadows && shadows.length) {
-    const { offsetX, offsetY, blurRadius, color } = shadows[0];
+    const {
+      offsetX,
+      offsetY,
+      blurRadius,
+      color
+    } = shadows[0];
 
     return `box-shadow: ${offsetX}px ${offsetY}px ${blurRadius}px ${transformCSSColor(
       color
@@ -431,7 +448,9 @@ function transformCSSOpacity(opacity) {
 
 function transformRNBackground(fills) {
   if (fills && fills.length) {
-    const { color } = fills[0];
+    const {
+      color
+    } = fills[0];
 
     return `backgroundColor: '${transformCSSColor(color)}',`;
   }
@@ -439,7 +458,10 @@ function transformRNBackground(fills) {
 
 function transformRNBorder(border) {
   if (border && border.length) {
-    const { thickness, color } = border[0];
+    const {
+      thickness,
+      color
+    } = border[0];
 
     return [
       `borderWidth: ${thickness},`,
@@ -457,7 +479,12 @@ function transformRNRadius(radius) {
 
 function transformRNShadow(shadows) {
   if (shadows && shadows.length) {
-    const { offsetX, offsetY, blurRadius, color } = shadows[0];
+    const {
+      offsetX,
+      offsetY,
+      blurRadius,
+      color
+    } = shadows[0];
     let _shadowColor = color["color-hex"].split(" ")[0];
     let _shadowOpacity = color.a;
 
@@ -487,8 +514,13 @@ function transformRNOpacity(opacity) {
  * @return {Undefined}
  */
 function appendCss(result) {
+  if (result.type === "text") {
+    console.log(result);
+  }
   let tmp = [];
-  const { type } = result;
+  const {
+    type
+  } = result;
 
   if (type) {
     switch (type) {
@@ -530,7 +562,9 @@ function appendCss(result) {
  */
 function appendRNCss(result) {
   let tmp = [];
-  const { type } = result;
+  const {
+    type
+  } = result;
 
   if (type) {
     switch (type) {
@@ -565,14 +599,20 @@ function appendRNCss(result) {
 class Transformer {
   constructor(
     meta,
-    pages,
-    { savePath, ignoreSymbolPage, foreignSymbols, layerTextStyles }
+    pages, {
+      savePath,
+      ignoreSymbolPage,
+      foreignSymbols,
+      layerTextStyles,
+      currentPage
+    }
   ) {
     this.meta = meta;
     this.pages = pages;
     this.savePath = savePath;
     this.assetsPath = join(savePath, "dist", "assets");
     this.ignoreSymbolPage = ignoreSymbolPage;
+    this.currentPage = currentPage;
     // hardcode some values.
     this.result = {
       scale: "1",
@@ -623,7 +663,20 @@ class Transformer {
     const result = this.result;
     const symbols = this.getAllSymbols();
     const textStyles = this.getAllTextStyles();
+    /** pagesAndArtboards item
+     * "76FC96FC-C0C4-48E8-9BA8-AC0574287359": {
+     *    "name": "App Page",
+     *    "artboards": {
+     *        "7CF79814-AD15-4226-9013-D7B215120287": {
+     *        "name": "iPhone 8"
+     *        }
+     *     }
+     * },
+     */
     Object.keys(pagesAndArtboards).forEach(k => {
+      if (k !== this.currentPage) {
+        return;
+      }
       const page = pages[k];
       const artboards = pagesAndArtboards[k].artboards; // all artboard reference in a single page
       const layers = page.layers; // all artboard detail information
@@ -662,8 +715,7 @@ class Transformer {
         result.artboards.push(
           transformArtboard(
             artboard,
-            pageMeta,
-            {
+            pageMeta, {
               savePath: this.savePath,
               assetsPath: this.assetsPath,
               symbols,
@@ -681,4 +733,6 @@ class Transformer {
   }
 }
 
-export { Transformer };
+export {
+  Transformer
+};

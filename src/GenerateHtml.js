@@ -9,13 +9,15 @@ import {
   rename
 } from './sketch-measure/generateImages';
 
-export function generateHtml(filePath,tmpPath) {
+export function generateHtml(filePath,tmpPath,currentPage) {
   const document = context.document;
 
   const NAME_MAP = {};
   let transformer;
   // unzip current sketch file task tmpPath
+  console.time("parseSketch")
   return parseSketchFile(filePath, tmpPath).then(data => {
+    console.timeEnd("parseSketch")
     transformer = new Transformer(data.meta, data.pages, {
       savePath: tmpPath,
       // Don't export symbol artboard.
@@ -24,15 +26,20 @@ export function generateHtml(filePath,tmpPath) {
       ignoreSymbolPage: true,
       // From version 47, sketch support library
       foreignSymbols: data.document.foreignSymbols,
-      layerTextStyles: data.document.layerTextStyles
+      layerTextStyles: data.document.layerTextStyles,
+      currentPage: currentPage
     });
     const processedData = transformer.convert();
     processedData.artboards.forEach(artboard => {
       NAME_MAP[artboard.objectID] = artboard.slug;
     });
+    console.time("generatePage");
     generatePage(processedData, tmpPath);
+    console.timeEnd("generatePage");
+    console.time("exportPreview");
     return generatePreviewImages(filePath, path.join(tmpPath, 'dist', 'preview'));
   }).then((images) => {
+    console.timeEnd("exportPreview");
     let promises = [];
     for( let image of images){
       const correctName = NAME_MAP[image];

@@ -32,26 +32,43 @@ export function parseSketchFile(filePath, tmpPath) {
     pages: {}
   };
   return new Promise((resolve, reject) => {
+    // unzip sketch文件生成数据
+    // 解压目录结构
+    /**
+     *|   document.json
+     *|   meta.json
+     *|   user.json
+     *├───pages
+     *|      7BD77F66-62BE-4003-A022-92E6ACF718D4.json //每个page下的数据
+     *|      ...
+     *├───previews
+     *|      preview.png
+     *├───text-previews
+     *|      text-previews-metadata.json
+     *|      text-previews.pdf
+     */
     unzipSketch(filePath, tmpPath)
-    .then(() => {
-      const meta = parseJSONFile(`${tmpPath}/meta.json`);
-      const document = parseJSONFile(`${tmpPath}/document.json`);
-      res.meta = meta;
-      res.document = document;
+      .then(() => {
+        const meta = parseJSONFile(`${tmpPath}/meta.json`);
+        const document = parseJSONFile(`${tmpPath}/document.json`);
+        res.meta = meta;
+        res.document = document;
 
-      const ids = Object.keys(meta.pagesAndArtboards);
-      res.pages = ids
-        .map(id => parseJSONFile(`${tmpPath}/pages/${id}.json`))
-        .reduce((acc, val, i) => {
-          acc[ids[i]] = val;
-          return acc;
-        }, {});
-      resolve(res);
-    })
-    .catch(e => {
-      reject(e);
-      console.error(e);
-    });
+        const ids = Object.keys(meta.pagesAndArtboards);
+        res.pages = ids
+          .map(id => parseJSONFile(`${tmpPath}/pages/${id}.json`))
+          .reduce((acc, val, i) => {
+            acc[ids[i]] = val;
+            return acc;
+          }, {});
+        //
+        // { PageId: json数据 }
+        resolve(res);
+      })
+      .catch(e => {
+        reject(e);
+        console.error(e);
+      });
   })
 
 }
