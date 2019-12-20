@@ -13,7 +13,7 @@
       "name": "连线",
       "identifier": "miaow.my-Link-identifier",
       "script": "./Link.js",
-      "shortcut": "command 1",
+      "shortcut": "command shift 1",
       "handlers": {
         "run": "onRun",
         "actions": {

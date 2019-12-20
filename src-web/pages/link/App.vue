@@ -5,13 +5,18 @@
       <el-input class="upload-input"
         placeholder="注释"
         @change="notesChange"
-        v-model="notes">
+        v-model="linkMessage.notes">
       </el-input>
       <p>线段类型</p>
       <template>
-          <el-radio v-model="radioType" label="0">类型1</el-radio>
-          <el-radio v-model="radioType" label="1">类型2</el-radio>
+          <el-radio v-model="linkMessage.type" label="0">类型1</el-radio>
+          <el-radio v-model="linkMessage.type" label="1">类型2</el-radio>
       </template>
+      <p>颜色</p>
+      <el-color-picker v-model="linkMessage.color" show-alpha></el-color-picker>
+      <p>粗细</p>
+ 	  <el-input-number v-model="linkMessage.num" :min="1" :max="10" label="描述文字"></el-input-number>
+
     </div>
     <div class="button-wrap">
       <button type="button" @click="confirmLink" class="el-button el-button--primary f-r m-l-10"><span>连线</span></button>
@@ -25,7 +30,13 @@ export default {
   name: "upload",
   data: function() {
     return {
-    	radioType:'0'
+    	linkMessage: {
+    		type: '0',
+    		notes: '',
+    		color: '',
+    		num: 6
+    	}
+    	
     }
   },
   watch: {
@@ -33,17 +44,25 @@ export default {
   },
   methods: {
     confirmLink: function() {
-
+      	window.postMessage('link',JSON.parse(JSON.stringify(this.linkMessage)));
     },
     closeWindow: function() {
+      window.postMessage('closeWindow','close');
 
     },
     notesChange: function() {
 
+    },
+    setLinkMessage: function(s) {
+    	if(s){
+    		this.linkMessage = s;
+    	}
     }
   },
   mounted: function(e) {
-    
+    window['setLinkMessage'] = (obj) =>{
+      this.setLinkMessage(obj);
+    }
   }
 };
 </script>
@@ -53,7 +72,7 @@ export default {
   float: right;
 }
 .uploadIcon-wrap .upload-input{
-  width: 202px !important;
+  width: 232px !important;
 }
 .button-wrap{
   margin-top: 20px;
@@ -64,8 +83,7 @@ export default {
   color: #333 !important;
 }
 .uploadIcon-wrap{
-  width: 560px;
-  padding: 20px;
+  width: 280px;
   overflow: hidden;
 }
 .svg-content{
