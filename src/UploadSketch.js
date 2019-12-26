@@ -84,9 +84,11 @@ export default function () {
         previewObj.selected.push(img);
       }
     });
+    //debug
+    // generateHtml(decodeURIComponent(document.path), tmpPath + "/html", document.selectedPage.id);
 
     // browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
-    browserWindow.loadURL("http://localhost:8081/UploadSketch?sketch=1");
+    browserWindow.loadURL("http://10.9.165.34:8081/UploadSketch?sketch=1");
   });
 
 
@@ -140,7 +142,7 @@ export default function () {
       util.mkdirpSync(tmpPath + "/symbolsvg");
       util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
         console.time("generate");
-        generateHtml(sketchFileUrl, tmpPath + "/html").then(() => {
+        generateHtml(sketchFileUrl, tmpPath + "/html", selected === "selected" ? document.selectedPage.id: "").then(() => {
           console.timeEnd("generate");
           util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
             // 压缩上传到web
