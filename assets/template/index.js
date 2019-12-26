@@ -802,7 +802,7 @@ I18N['zh-cn'] = {
                     if (fill.fillType == "color") {
                         fills.push( self.colorItem(fill.color) );
                     }
-                    else{
+                    else if(fill.fillType == "gradient"){
                         fills.push('<div class="gradient">');
                         $.each(fill.gradient.colorStops, function(index, gradient) {
                             fills.push(self.colorItem(gradient.color));
@@ -906,12 +906,12 @@ I18N['zh-cn'] = {
             // CODE TEMPLATE
             var tab = [
                 '<ul class="tab" id="code-tab" >',
-                '<li class="icon-rncss-panel" data-id="rncss-panel" data-codeType="rncss" ></li>',
+                // '<li class="icon-rncss-panel" data-id="rncss-panel" data-codeType="rncss" ></li>',
                 '<li class="icon-css-panel" data-id="css-panel" data-codeType="css" ></li>',
                 '<li class="icon-android-panel" data-id="android-panel" data-codeType="android" ></li>',
                 '<li class="icon-ios-panel" data-id="ios-panel" data-codeType="ios" ></li>',
                 '</ul>'].join('')
-            
+
             var css = [];
             var css = [
                 '<div id="css-panel" class="code-item item">',
@@ -919,10 +919,10 @@ I18N['zh-cn'] = {
                 '</div>'].join('')
 
             var rncss = [];
-            var rncss = [
-                '<div id="rncss-panel" class="code-item item">',
-                '<label><textarea id="rncss" rows="' + (layerData.rncss.length + 1) + '" readonly="readonly">' + layerData.rncss.join("\r\n") + '</textarea></label>',
-                '</div>'].join('')
+            // var rncss = [
+            //     '<div id="rncss-panel" class="code-item item">',
+            //     '<label><textarea id="rncss" rows="' + (layerData.rncss.length + 1) + '" readonly="readonly">' + layerData.rncss.join("\r\n") + '</textarea></label>',
+            //     '</div>'].join('')
 
             var android = [];
             if(layerData.type == "text"){
@@ -992,7 +992,7 @@ I18N['zh-cn'] = {
                 );
             }
             html.push(this.propertyType('CODE TEMPLATE', [ tab, rncss, css, android.join(''), ios.join('') ].join(''), true));
-            
+
             //  EXPORTABLE
             if(layerData.exportable && layerData.exportable.length > 0){
                 var expHTML = [],
