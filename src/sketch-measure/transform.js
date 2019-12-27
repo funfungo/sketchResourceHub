@@ -128,7 +128,14 @@ function transformRadius(points) {
   return points[0].cornerRadius;
 }
 
-
+function restrictFrameMask(parentPos, frame){
+  return {
+    x: frame.x < 0 ? parentPos.x : frame.x + (parentPos.x || 0),
+    y: frame.y < 0 ? parentPos.y : frame.y + (parentPos.y || 0),
+    width: round(parentPos.width < frame.width ? parentPos.width : frame.width, 1),
+    height: round(parentPos.height < frame.height ? parentPos.height : frame.height, 1)
+  }
+}
 /**
  * Transform frame, get position & size
  * @param  {Object} layer  layer data
@@ -136,17 +143,18 @@ function transformRadius(points) {
  * @param  {Object} pos    parent layer"s position
  * @return {Undefined}
  */
-export function transformFrame(layer, result, {
-  x,
-  y
-}) {
+export function transformFrame(layer, result, parentPos) {
   const frame = layer.frame;
-  result.rect = {
-    width: round(frame.width, 1),
-    height: round(frame.height, 1),
-    x: frame.x + (x || 0),
-    y: frame.y + (y || 0)
+  let rect = {
+    x: frame.x + (parentPos.x || 0),
+    y: frame.y + (parentPos.y || 0),
+    width:  round(frame.width, 1),
+    height: round(frame.height, 1)
   };
+  if(layer.sketchObject.isMasked&&layer.sketchObject.isMasked()){
+    rect = restrictFrameMask(parentPos, layer.frame);
+  };
+  result.rect = rect;
 }
 
 function parseText(layer) {

@@ -23,15 +23,16 @@ import {
 
 const documentData = context.document.documentData();
 
-//store symbol for multiple use;
-const symbolMap = {};
+function outRange(range, rect){
+  return rect.x > range.width || rect.y > range.height || rect.x + rect.width < 0 || rect.y + rect.height < 0
+}
 /**
  * get nested symbolInstance style
  * @param {Object} layer symbolInstance
  * @param {*} acc
  * @returns
  */
-function transformSymbol(layer) {
+function transformSymbol(layer,extra) {
   let symbolInstance = layer.sketchObject;
   let symbolID = symbolInstance.symbolID();
   let immutableInstance = symbolInstance.immutableModelObject();
@@ -40,7 +41,8 @@ function transformSymbol(layer) {
   let symbol = sketch.fromNative(symbolData);
   //只处理一层嵌套symbol,多层忽略
   return recursiveGenerateLayer(symbol.layers, {
-    parentPos: layer.frame,
+    artboard: extra.artboard,
+    parentPos: extra.parentPos,
     stop: true
   });
 }
@@ -63,10 +65,14 @@ function recursiveGenerateLayer(layers, extra) {
       name: layer.name,
       rotation: layer.transform.rotation
     }
-    if(layer.name == "状态"){
+    if(layer.name == "Rectangle 5"){
       console.log(layer);
     }
     transformFrame(layer, layerInfo, extra.parentPos || {})
+    // 忽略artboard中不可见的元素
+    if(extra.artboard && outRange(extra.artboard, layerInfo.rect)){
+      return acc;
+    }
     transformStyle(layer, layerInfo);
     if (layer.type === "Text") {
       transformText(layer, layerInfo);
@@ -74,10 +80,14 @@ function recursiveGenerateLayer(layers, extra) {
     appendCss(layerInfo);
     acc.push(layerInfo)
     if (layer.type === "SymbolInstance") {
-      acc = acc.concat(transformSymbol(layer));
+      acc = acc.concat(transformSymbol(layer, {
+        artboard: extra.artboard,
+        parentPos: layerInfo.rect
+      }));
     }
     if (layer.layers && !extra.stop) {
       acc = acc.concat(recursiveGenerateLayer(layer.layers, {
+        artboard: extra.artboard,
         parentPos: layerInfo.rect
       }));
     }
@@ -128,7 +138,7 @@ export function generateHtml(filePath, tmpPath, currentPage) {
     data.artboards.forEach(artboard => {
       NAME_MAP[artboard.objectID] = artboard.slug;
     })
-    console.log(data);
+    // console.log(data);
     console.log(counter);
     generatePage(data, tmpPath);
   } catch (e) {
