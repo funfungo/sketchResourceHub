@@ -4,7 +4,6 @@ import BrowserWindow from "sketch-module-web-view";
 import {
   getWebview
 } from "sketch-module-web-view/remote";
-import UI from "sketch/ui";
 import sketch from "sketch";
 import * as util from "./util";
 import {
@@ -85,7 +84,9 @@ export default function () {
       }
     });
     //debug
-    // generateHtml(decodeURIComponent(document.path), tmpPath + "/html", document.selectedPage.id);
+    // console.time("generate");
+    // generateHtml(tmpPath + "/html", document.selectedPage.id);
+    // console.timeEnd("generate");
 
     // browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
     browserWindow.loadURL("http://10.9.165.34:8081/UploadSketch?sketch=1");
@@ -133,98 +134,30 @@ export default function () {
     }
     console.timeEnd("export");
 
-
-    if (type == 2) {
-      //TODO 设计稿导出标注
-      //TODO 导出symbol icons
-      let symbols = util.findPagesMaster(context);
-      util.mkdirpSync(tmpPath + "/symbolpng");
-      util.mkdirpSync(tmpPath + "/symbolsvg");
-      util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
+    util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
+      if(type== 2){
         console.time("generate");
-        generateHtml(sketchFileUrl, tmpPath + "/html", selected === "selected" ? document.selectedPage.id: "").then(() => {
-          console.timeEnd("generate");
-          util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
-            // 压缩上传到web
-            util.zipSketch([zipUrl, tmpPath]).then(() => {
-              let data = util.encodeBase64(zipUrl);
-              webContents
-                .executeJavaScript(
-                  `callSketchUpload(${JSON.stringify({
-                  documentId: documentId,
-                  md5: fileHash,
-                  sketchContent: data,
-                  sketchName: documentName,
-                  imgIds: imgIds
-                })})`
-                )
-                .catch(console.error);
-            });
-          });
-        }).catch(err => {
-          console.log(err);
-        })
-      })
-    } else {
-
-      util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
-        // 压缩上传到web
-        util.zipSketch([zipUrl, tmpPath]).then(() => {
-          let data = util.encodeBase64(zipUrl);
-          webContents
-            .executeJavaScript(
-              `callSketchUpload(${JSON.stringify({
-              documentId: documentId,
-              md5: fileHash,
-              sketchContent: data,
-              sketchName: documentName,
-              imgIds: imgIds
-            })})`
-            )
-            .catch(console.error);
-        });
+        generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "");
+        //todo generate symbol icons
+        console.timeEnd("generate");
+      }
+      // 压缩上传到web
+      util.zipSketch([zipUrl, tmpPath]).then(() => {
+        let data = util.encodeBase64(zipUrl);
+        webContents
+          .executeJavaScript(
+            `callSketchUpload(${JSON.stringify({
+            documentId: documentId,
+            md5: fileHash,
+            sketchContent: data,
+            sketchName: documentName,
+            imgIds: imgIds
+          })})`
+          )
+          .catch(console.error);
       });
-    }
+    })
 
-
-
-    // util.saveSketchFile([path, sketchFileUrl]).then(() => {
-    //   const fileHash = String(
-    //     NSFileManager.defaultManager()
-    //       .contentsAtPath(sketchFileUrl)
-    //       .sha1AsString()
-    //   );
-
-    //   symbols.forEach((symbol, item) => {
-    //     util.captureLayerImage(
-    //       context,
-    //       symbol,
-    //       basePath + "symbolpng/" + symbol.name().replace(/\//gi, "_") + ".png"
-    //     );
-    //     util.captureLayerImage(
-    //       context,
-    //       symbol,
-    //       basePath + "symbolsvg/" + symbol.name().replace(/\//gi, "_") + ".svg",
-    //       "svg"
-    //     );
-    //   });
-
-    // generateHtml(sketchFileUrl, basePath + "html/").then(() => {
-    //       util
-    //         .zipSketch([zipUrl, basePath.substr(0, basePath.length - 1)])
-    //         .then(() => {
-    //           let data = util.encodeBase64(zipUrl);
-    //           webContents
-    //             .executeJavaScript(
-    //               `callSketchUpload(${JSON.stringify({
-    //                 sketchContent: data,
-    //                 md5: fileHash
-    //               })})`
-    //             )
-    //             .catch(console.error);
-    //         });
-    //     });
-    // });
   });
 
   webContents.on("openURL", s => {

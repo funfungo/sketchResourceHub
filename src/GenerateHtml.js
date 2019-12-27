@@ -52,7 +52,6 @@ function transformSymbol(layer,extra) {
   });
 }
 
-let counter = 0;
 /**
  *  generate layer data recursively
  *
@@ -61,7 +60,6 @@ let counter = 0;
  * @returns {Array} layers data array
  */
 function recursiveGenerateLayer(layers, extra) {
-  counter += layers.length;
   return layers.reduce((acc, layer) => {
     if (layer.hidden) return acc
     let layerInfo = {
@@ -69,9 +67,6 @@ function recursiveGenerateLayer(layers, extra) {
       type: layer.type.toLowerCase(),
       name: layer.name,
       rotation: layer.transform.rotation
-    }
-    if(layer.name == "Rectangle 5"){
-      console.log(layer);
     }
     transformFrame(layer, layerInfo, extra.parentPos || {})
     // 忽略artboard中不可见的元素
@@ -100,7 +95,7 @@ function recursiveGenerateLayer(layers, extra) {
   }, [])
 }
 
-export function generateHtml(filePath, tmpPath, currentPage) {
+export function generateHtml(tmpPath, currentPage) {
   let data = {
     scale: "1",
     unit: "px",
@@ -126,7 +121,6 @@ export function generateHtml(filePath, tmpPath, currentPage) {
             imagePath: `preview/${layer.id}@2x.png`,
             layers: []
           }
-
           artboard.layers = recursiveGenerateLayer(layer.layers, {
             artboard
           });
@@ -143,8 +137,6 @@ export function generateHtml(filePath, tmpPath, currentPage) {
     data.artboards.forEach(artboard => {
       NAME_MAP[artboard.objectID] = artboard.slug;
     })
-    // console.log(data);
-    console.log(counter);
     generatePage(data, tmpPath);
   } catch (e) {
     console.log(e);
