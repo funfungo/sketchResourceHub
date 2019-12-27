@@ -1,3 +1,8 @@
+/**
+ * generate html refer to sketch measure
+ * pls do not convert some ancient sketch file
+ */
+
 const sketch = require("sketch/dom");
 const document = sketch.getSelectedDocument();
 import {
@@ -7,11 +12,6 @@ import path from "@skpm/path";
 import {
   generatePage
 } from "./sketch-measure/generateMeasurePage";
-import {
-  generatePreviewImages,
-  generateSliceImages,
-  rename
-} from "./sketch-measure/generateImages";
 import {
   transformStyle,
   transformFrame,
@@ -23,25 +23,38 @@ import {
 
 const documentData = context.document.documentData();
 
+//store symbol for multiple use;
+const symbolMap = {};
 /**
  * get nested symbolInstance style
  * @param {Object} layer symbolInstance
  * @param {*} acc
  * @returns
  */
-function transformSymbol(layer, acc) {
+function transformSymbol(layer) {
   let symbolInstance = layer.sketchObject;
   let symbolID = symbolInstance.symbolID();
   let immutableInstance = symbolInstance.immutableModelObject();
   let immutableMaster = documentData.symbolWithID(symbolID).immutableModelObject();
   let symbolData = immutableMaster.modifiedMasterByApplyingInstance_inDocument_(immutableInstance, nil);
   let symbol = sketch.fromNative(symbolData);
-  acc = acc.concat(recursiveGenerateLayer(symbol.layers, {
-    parentPos: layer.frame
-  }));
-  return acc;
+  //只处理一层嵌套symbol,多层忽略
+  return recursiveGenerateLayer(symbol.layers, {
+    parentPos: layer.frame,
+    stop: true
+  });
 }
+
+let counter = 0;
+/**
+ *  generate layer data recursively
+ *
+ * @param {Object} layers
+ * @param {Object} extra parent position used to calculate nested layer frame position
+ * @returns {Array} layers data array
+ */
 function recursiveGenerateLayer(layers, extra) {
+  counter += layers.length;
   return layers.reduce((acc, layer) => {
     if (layer.hidden) return acc
     let layerInfo = {
@@ -50,23 +63,23 @@ function recursiveGenerateLayer(layers, extra) {
       name: layer.name,
       rotation: layer.transform.rotation
     }
-    if (layer.name == "test") {
+    if(layer.name == "状态"){
       console.log(layer);
     }
-    transformStyle(layer, layerInfo);
     transformFrame(layer, layerInfo, extra.parentPos || {})
+    transformStyle(layer, layerInfo);
     if (layer.type === "Text") {
       transformText(layer, layerInfo);
     }
     appendCss(layerInfo);
     acc.push(layerInfo)
-    if (layer.layers) {
+    if (layer.type === "SymbolInstance") {
+      acc = acc.concat(transformSymbol(layer));
+    }
+    if (layer.layers && !extra.stop) {
       acc = acc.concat(recursiveGenerateLayer(layer.layers, {
         parentPos: layerInfo.rect
       }));
-    }
-    if (layer.type === "SymbolInstance") {
-      acc = acc.concat(transformSymbol(layer, acc));
     }
     return acc;
   }, [])
@@ -99,19 +112,27 @@ export function generateHtml(filePath, tmpPath, currentPage) {
             layers: []
           }
 
-          artboard.layers = recursiveGenerateLayer(layer.layers, {});
+          artboard.layers = recursiveGenerateLayer(layer.layers, {
+            artboard
+          });
           data.artboards.push(artboard);
+          sketch.export(layer, {
+            output: path.join(tmpPath, "dist", "preview"),
+            "save-for-web": true,
+            "use-id-for-name": true,
+            scales: 2
+          });
         }
       })
     })
     data.artboards.forEach(artboard => {
       NAME_MAP[artboard.objectID] = artboard.slug;
     })
+    console.log(data);
+    console.log(counter);
     generatePage(data, tmpPath);
-    return generatePreviewImages(filePath, path.join(tmpPath, "dist", "preview"));
   } catch (e) {
     console.log(e);
   }
-
-
 }
+

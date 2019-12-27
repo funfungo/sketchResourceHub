@@ -48,7 +48,6 @@ function generateIndexHtml (data, dest) {
   }
   const html = INDEX_HTML.replace(/__data__/, JSON.stringify(data, null, 2))
   const nsHtml = NSMutableString.stringWithString(html);
-  console.log(dest);
   nsHtml.writeToFile_atomically_encoding_error(path.join(dest,'index.html'), true, NSUTF8StringEncoding, err);
   if (err.value() !== null) {
     console.log(String(err.value()));
