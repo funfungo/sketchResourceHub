@@ -3,12 +3,11 @@
  * pls do not convert some ancient sketch file
  */
 
-const sketch = require("sketch/dom");
-const document = sketch.getSelectedDocument();
+
+import path from "@skpm/path";
 import {
   getSlug
 } from "./sketch-measure/utils";
-import path from "@skpm/path";
 import {
   generatePage
 } from "./sketch-measure/generateMeasurePage";
@@ -20,16 +19,24 @@ import {
 import {
   appendCss
 } from "./sketch-measure/transformCss";
-
+const sketch = require("sketch/dom");
+const document = sketch.getSelectedDocument();
 const documentData = context.document.documentData();
 
+/**
+ * detect whether a rect is out sight of range
+ *
+ * @param {Object} range
+ * @param {Object} rect
+ * @returns
+ */
 function outRange(range, rect){
   return rect.x > range.width || rect.y > range.height || rect.x + rect.width < 0 || rect.y + rect.height < 0
 }
 /**
  * get nested symbolInstance style
  * @param {Object} layer symbolInstance
- * @param {*} acc
+ * @param {Object} extra
  * @returns
  */
 function transformSymbol(layer,extra) {
@@ -39,11 +46,9 @@ function transformSymbol(layer,extra) {
   let immutableMaster = documentData.symbolWithID(symbolID).immutableModelObject();
   let symbolData = immutableMaster.modifiedMasterByApplyingInstance_inDocument_(immutableInstance, nil);
   let symbol = sketch.fromNative(symbolData);
-  //只处理一层嵌套symbol,多层忽略
   return recursiveGenerateLayer(symbol.layers, {
     artboard: extra.artboard,
     parentPos: extra.parentPos,
-    stop: true
   });
 }
 
@@ -85,7 +90,7 @@ function recursiveGenerateLayer(layers, extra) {
         parentPos: layerInfo.rect
       }));
     }
-    if (layer.layers && !extra.stop) {
+    if (layer.layers) {
       acc = acc.concat(recursiveGenerateLayer(layer.layers, {
         artboard: extra.artboard,
         parentPos: layerInfo.rect
