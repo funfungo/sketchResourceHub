@@ -88,8 +88,8 @@ export default function () {
     // generateHtml(tmpPath + "/html", document.selectedPage.id);
     // console.timeEnd("generate");
 
-    // browserWindow.loadURL('https://wedesign.oa.com/UploadSketch?sketch=1');
-    browserWindow.loadURL("http://10.9.165.34:8081/UploadSketch?sketch=1");
+    browserWindow.loadURL('https://wedesign.oa.com/uploadSketch?sketch=1');
+    // browserWindow.loadURL("http://localhost:8081/UploadSketch?sketch=1");
   });
 
 
@@ -99,12 +99,12 @@ export default function () {
 
   const webContents = browserWindow.webContents;
   webContents.on("did-finish-load", () => {
+  });
+  webContents.on("readyForData", () => {
     webContents
       .executeJavaScript(`previewSketch(${JSON.stringify(previewObj)})`)
       .catch(console.error);
-  });
-
-
+  })
   webContents.on("sketchUpload", s => {
     // 交互or视觉
     let type = s.type || 1; //1：交互 2：视觉
@@ -135,7 +135,7 @@ export default function () {
     console.timeEnd("export");
 
     util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
-      if(type== 2){
+      if (type == 2) {
         console.time("generate");
         generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "");
         //todo generate symbol icons
