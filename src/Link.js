@@ -12,7 +12,7 @@ var selectionDom = "com.sketchplugins.wechat.selectionDom";
 var selectionDom1 = "com.sketchplugins.wechat.selectionDom1";
 var selectionDom2 = "com.sketchplugins.wechat.selectionDom2";
 // path.setLineDash_count_phase([5,5,5],3,0);
-var colorLineLink = NSUserDefaults.standardUserDefaults().objectForKey(lineColorKeyLink) || "#1AAD19";
+var colorLineLink = NSUserDefaults.standardUserDefaults().objectForKey(lineColorKeyLink) || "rgba(0,0,0,1)";
 var lineThicknessLink = NSUserDefaults.standardUserDefaults().objectForKey(lineThicknessLinkKey) || "6";
 var linkObject;
 var destArtboard, linkLayer2;
@@ -1334,7 +1334,12 @@ export default function() {
 			}
 		}
 		var artboardID = destArtboard.objectID();
-		linkObject = JSON.parse(context.command.valueForKey_onLayer_forPluginIdentifier("artboardMessage", linkLayer2, kPluginDomain));
+		linkObject = JSON.parse(context.command.valueForKey_onLayer_forPluginIdentifier("artboardMessage", linkLayer2, kPluginDomain) || '{}');
+		colorLineLink = ('' + NSUserDefaults.standardUserDefaults().objectForKey(lineColorKeyLink)) || "rgba(0,0,0,1)";
+		lineThicknessLink = NSUserDefaults.standardUserDefaults().objectForKey(lineThicknessLinkKey) + '' || "6";
+		linkObject.color = colorLineLink;
+		linkObject.num = lineThicknessLink;
+		log(linkObject);
 		webContents
 	      .executeJavaScript(`setLinkMessage(${JSON.stringify(linkObject)})`)
 	      .catch(console.error);
@@ -1343,11 +1348,12 @@ export default function() {
 
 
 	webContents.on('link', s => {
+		log(s);
 		var artboardID = destArtboard.objectID();
-		NSUserDefaults.standardUserDefaults().setObject_forKey(s.color, lineColorKeyLink);
-		NSUserDefaults.standardUserDefaults().setObject_forKey(s.num, lineThicknessLinkKey);
-		colorLineLink = s.color;
-		lineThicknessLink = s.num;
+		NSUserDefaults.standardUserDefaults().setObject_forKey('' + s.color, lineColorKeyLink);
+		NSUserDefaults.standardUserDefaults().setObject_forKey('' + s.num , lineThicknessLinkKey);
+		colorLineLink = '' + s.color;
+		lineThicknessLink = '' + s.num;
 		context.command.setValue_forKey_onLayer_forPluginIdentifier(JSON.stringify(s), "artboardMessage", linkLayer2, kPluginDomain);
 		getLink(context);
 		browserWindow.close();

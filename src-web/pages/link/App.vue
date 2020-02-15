@@ -35,7 +35,7 @@ export default {
     	linkMessage: {
     		type: '0',
     		notes: '',
-    		color: '',
+    		color: 'rgba(1,1,1,1)',
     		num: 6
     	}
     	
@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     confirmLink: function() {
-      	window.postMessage('link',JSON.parse(JSON.stringify(this.linkMessage)));
+      window.postMessage('link',JSON.parse(JSON.stringify(this.linkMessage)));
     },
     closeWindow: function() {
       window.postMessage('closeWindow','close');
