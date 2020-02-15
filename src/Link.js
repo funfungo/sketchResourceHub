@@ -11,10 +11,10 @@ var lineThicknessLinkKey = "com.sketchplugins.wechat.lineThicknessLink";
 var selectionDom = "com.sketchplugins.wechat.selectionDom";
 var selectionDom1 = "com.sketchplugins.wechat.selectionDom1";
 var selectionDom2 = "com.sketchplugins.wechat.selectionDom2";
-
+// path.setLineDash_count_phase([5,5,5],3,0);
 var colorLineLink = NSUserDefaults.standardUserDefaults().objectForKey(lineColorKeyLink) || "#1AAD19";
 var lineThicknessLink = NSUserDefaults.standardUserDefaults().objectForKey(lineThicknessLinkKey) || "6";
-
+var linkObject;
 var destArtboard, linkLayer2;
 function getLink(context, s) {
 	function rgb(a) {
@@ -907,7 +907,6 @@ function getLink(context, s) {
 			if (returnLine.flag == false) {
 				returnLine = findAway2(domA, domB, doc);
 			}
-			log(returnLine);
 			line = drawLine(returnLine.line, returnLine.endPoisiton, true);
 
 
@@ -948,8 +947,6 @@ function getLink(context, s) {
 	var isCoincidenis = function (a,b) {
 		var c = {a:Math.min(a.a,a.b),b:Math.min(a.a,a.b)};
 		var d = {a:Math.min(b.a,b.b),b:Math.min(b.a,b.b)};
-		log(c);
-		log(d);
 		if((c.a >= d.a && c.a <= d.b) || (c.b >= d.a && c.b <= d.b)){
 			return true;
 		}else{
@@ -968,7 +965,6 @@ function getLink(context, s) {
 		}
 		var linePaths = [];
 		var linePath = NSBezierPath.bezierPath();
-
 		var lineCount = linepoint.length;
 		var offset = 20;
 		var coincideOffset = lineThicknessLink * 5;
@@ -1009,6 +1005,47 @@ function getLink(context, s) {
 				} else {}
 			}
 		}
+
+		//计算需要的
+		log(linepoint);
+
+		var LinePointArrLocation = (parseInt(linepoint.length/2));
+		var textArr = linkObject.notes.split('\n');
+		var longLength = 0;
+		var LinePointArrLocationObj = {
+			direction: linepoint[LinePointArrLocation-1].direction,
+			position: linepoint[LinePointArrLocation-1].position,
+			x: linepoint[LinePointArrLocation-1].x + ((linepoint[LinePointArrLocation].x - linepoint[LinePointArrLocation-1].x)/2),
+			y: linepoint[LinePointArrLocation-1].y + ((linepoint[LinePointArrLocation].y - linepoint[LinePointArrLocation-1].y)/2)
+		}
+
+		//判断最长一排的长度
+		for(var i = 0;i < textArr.length; i++){
+			if(textArr[i].length > longLength){
+				longLength = textArr[i].replace(/[\u0391-\uFFE5]/g,"aa").length;
+			}
+		}
+
+		if(LinePointArrLocationObj.direction == 'l' || LinePointArrLocationObj.direction == 'r'){
+			LinePointArrLocationObj.y = LinePointArrLocationObj.y - 30 - textArr.length * 24;
+			LinePointArrLocationObj.x = LinePointArrLocationObj.x - longLength * 5;
+		}else{
+			LinePointArrLocationObj.x = LinePointArrLocationObj.x + 20;
+			LinePointArrLocationObj.y = LinePointArrLocationObj.y - longLength * 12;
+		}
+
+		var textLayer = MSTextLayer.alloc().init();
+
+		textLayer.absoluteRect().setX(LinePointArrLocationObj.x);
+		textLayer.absoluteRect().setY(LinePointArrLocationObj.y);
+		textLayer.setName('Label');
+		var fixedBehaviour = 1;
+		textLayer.setTextBehaviour(fixedBehaviour);
+		textLayer.setStringValue(linkObject.notes);
+		textLayer.setTextColor(MSImmutableColor.colorWithIntegerRed_green_blue_alpha(colorLineLinkR, colorLineLinkG, colorLineLinkB, colorLineLinkA).newMutableCounterpart());
+		textLayer.setFontSize(20);
+
+		
 
 		for (var i = 0; i < lineCount - 1; i++) {
 			if (i === 0) { // 第一个点不做修改
@@ -1057,6 +1094,11 @@ function getLink(context, s) {
 		}
 		var lineSh = MSShapePathLayer.layerWithPath(MSPath.pathWithBezierPath(linePath));
 		var hitAreaBorder = lineSh.style().addStylePartOfType(1);
+
+		if(linkObject && linkObject.type == 1){
+			lineSh.style().borderOptions().dashPattern = [20,5,20,5];
+		}
+
 		hitAreaBorder.setColor(MSImmutableColor.colorWithIntegerRed_green_blue_alpha(colorLineLinkR, colorLineLinkG, colorLineLinkB, colorLineLinkA).newMutableCounterpart());
 		hitAreaBorder.setThickness(lineThicknessLink);
 		hitAreaBorder.setPosition(0);
@@ -1103,6 +1145,9 @@ function getLink(context, s) {
 
 			var arrow = MSShapePathLayer.layerWithPath(MSPath.pathWithBezierPath(arrowPath));
 			var arrowStyle = arrow.style().addStylePartOfType(1);
+			if(linkObject && linkObject.type == 1){
+				arrow.style().borderOptions().dashPattern = [20,5,20,5];
+			}
 			arrowStyle.setThickness(lineThicknessLink);
 			arrowStyle.setColor(MSImmutableColor.colorWithIntegerRed_green_blue_alpha(colorLineLinkR, colorLineLinkG, colorLineLinkB, colorLineLinkA).newMutableCounterpart());
 			arrow.setName('Arrow');
@@ -1113,12 +1158,13 @@ function getLink(context, s) {
 
 		var endArrow = drawArrow(linepoint[lineCount - 1].x, linepoint[lineCount - 1].y, linepoint[lineCount - 2].direction);
 		// 
-		return [lineSh,  startRound , endArrow];
+		return [lineSh,  startRound , endArrow, textLayer];
 	}
 
 	var drawConnections = function (connection, doc) {
 		var draw = drawPPP(connection.linkRect, connection.artboard, doc);
-		log(draw);
+		
+
 		doc.addLayers(draw);
 
 		var connectionLayersDom = MSLayerArray.arrayWithLayers(draw);
@@ -1145,6 +1191,7 @@ function getLink(context, s) {
 
 		while (linkLayer = loop.nextObject()) {
 			destinationArtboardID = context.command.valueForKey_onLayer_forPluginIdentifier("destinationArtboardID", linkLayer, kPluginDomain);
+			linkObject = JSON.parse(context.command.valueForKey_onLayer_forPluginIdentifier("artboardMessage", linkLayer, kPluginDomain));
 			var Message = destinationArtboardID.split('____');
 			destinationArtboard = doc.currentPage().children().filteredArrayUsingPredicate(NSPredicate.predicateWithFormat("(objectID == %@) || (userInfo != nil && function(userInfo, 'valueForKeyPath:', %@).artboardID == %@)", Message[1], kPluginDomain, Message[1])).firstObject();
 
@@ -1231,10 +1278,6 @@ if (selection.count() == 1) {
 redrawConnections(context);
 }
 
-function getLinkMessage() {
-
-
-}
 
 export default function() {
 	var doc = context.document;
@@ -1246,7 +1289,7 @@ export default function() {
 	const options = {
 		parent: sketch.getSelectedDocument(),
 		identifier: webviewIdentifier,
-		width: 300,
+		width: 360,
 		height: 500,
 		frame: false,
 		minimizable: false,
@@ -1291,10 +1334,9 @@ export default function() {
 			}
 		}
 		var artboardID = destArtboard.objectID();
-		var linkObject = context.command.valueForKey_onLayer_forPluginIdentifier("artboardMessage", linkLayer2, kPluginDomain);
-		console.log(JSON.stringify(linkObject));
+		linkObject = JSON.parse(context.command.valueForKey_onLayer_forPluginIdentifier("artboardMessage", linkLayer2, kPluginDomain));
 		webContents
-	      .executeJavaScript(`setLinkMessage(${(linkObject)})`)
+	      .executeJavaScript(`setLinkMessage(${JSON.stringify(linkObject)})`)
 	      .catch(console.error);
 		
 	});
@@ -1304,6 +1346,8 @@ export default function() {
 		var artboardID = destArtboard.objectID();
 		NSUserDefaults.standardUserDefaults().setObject_forKey(s.color, lineColorKeyLink);
 		NSUserDefaults.standardUserDefaults().setObject_forKey(s.num, lineThicknessLinkKey);
+		colorLineLink = s.color;
+		lineThicknessLink = s.num;
 		context.command.setValue_forKey_onLayer_forPluginIdentifier(JSON.stringify(s), "artboardMessage", linkLayer2, kPluginDomain);
 		getLink(context);
 		browserWindow.close();

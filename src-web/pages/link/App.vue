@@ -4,13 +4,15 @@
       <p>注释</p>
       <el-input class="upload-input"
         placeholder="注释"
+        type="textarea"
+        row="3"
         @change="notesChange"
         v-model="linkMessage.notes">
       </el-input>
       <p>线段类型</p>
       <template>
-          <el-radio v-model="linkMessage.type" label="0">类型1</el-radio>
-          <el-radio v-model="linkMessage.type" label="1">类型2</el-radio>
+          <el-radio v-model="linkMessage.type" label="0">实线</el-radio>
+          <el-radio v-model="linkMessage.type" label="1">虚线</el-radio>
       </template>
       <p>颜色</p>
       <el-color-picker v-model="linkMessage.color" show-alpha></el-color-picker>
@@ -83,7 +85,8 @@ export default {
   color: #333 !important;
 }
 .uploadIcon-wrap{
-  width: 280px;
+  width: 320px;
+  padding-left: 10px;
   overflow: hidden;
 }
 .svg-content{
