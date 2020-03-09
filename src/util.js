@@ -2,6 +2,29 @@ import child_process from '@skpm/child_process'; // ⚠️ The version 0.4.* req
 import * as fs from '@skpm/fs';
 import path from '@skpm/path';
 
+export function rgb(a) {
+  if(a.indexOf('rgba(') > -1){
+    var rgba = a.replace('rgba(','').replace(')','');
+    rgba = rgba.replace(/\s/g,"").split(',');
+    return rgba;
+  }else{
+    var sColor = a.toLowerCase();
+      if (sColor.length === 4) {
+          var sColorNew = "#";
+          for (var i = 1; i < 4; i += 1) {
+              sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
+          }
+          sColor = sColorNew;
+      }
+      //处理六位的颜色值
+      var sColorChange = [];
+      for (var i = 1; i < 7; i += 2) {
+          sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
+      }
+      return sColorChange;
+  }
+}
+
 export function getLibraries() {
   let libraries = Array.from(NSApp.delegate().librariesController().libraries())
   .filter(lib => !!lib.locationOnDisk() && !!lib.enabled() && !!lib.libraryID())
@@ -188,6 +211,86 @@ export function errorDialog(context,content) {
     alert.setInformativeText(content);
     return alert.runModal();
 }
+
+export function createRadioButtons(options, selectedItem) {
+    var ui = NSRadioButton;
+    var type = NSRadioModeMatrix;
+
+    var rows = Math.ceil(options.length / 2);
+    var columns = ((options.length < 2) ? 1 : 2);
+
+    var selectedRow = Math.floor(selectedItem / 2);
+    var selectedColumn = selectedItem - (selectedRow * 2);
+
+    var buttonCell = NSButtonCell.alloc().init();
+    buttonCell.setButtonType(ui);
+
+
+    var buttonMatrix = NSMatrix.alloc().initWithFrame_mode_prototype_numberOfRows_numberOfColumns(NSMakeRect(20.0, 20.0, 300.0, rows * 25),type,buttonCell,rows,columns);
+    buttonMatrix.setCellSize(NSMakeSize(140, 20));
+
+    for (var i = 0; i < options.length; i++) {
+        buttonMatrix.cells().objectAtIndex(i).setTitle(options[i]);
+        buttonMatrix.cells().objectAtIndex(i).setTag(i);
+    }
+
+    if (rows * columns > options.length) {
+      buttonMatrix.cells().objectAtIndex().setTransparent(true);
+      buttonMatrix.cells().objectAtIndex().setEnabled(false);
+
+    }
+    buttonMatrix.selectCellAtRow_column(selectedRow,selectedColumn);
+    return buttonMatrix;
+}
+
+export function createRadioButtons2(options, selectedItem) {
+    var ui = NSRadioButton;
+    var type = NSRadioModeMatrix;
+
+    var rows = Math.ceil(options.length / 3);
+    var columns = 3;
+
+    var selectedRow = Math.floor(selectedItem / 3);
+    var selectedColumn = selectedItem - (selectedRow * 3);
+
+    var buttonCell = NSButtonCell.alloc().init();
+    buttonCell.setButtonType(ui);
+
+
+    var buttonMatrix = NSMatrix.alloc().initWithFrame_mode_prototype_numberOfRows_numberOfColumns(NSMakeRect(20.0, 20.0, 300.0, rows * 25),type,buttonCell,rows,columns);
+    buttonMatrix.setCellSize(NSMakeSize(90, 20));
+
+    for (var i = 0; i < options.length; i++) {
+      buttonMatrix.cells().objectAtIndex(i).setTitle(options[i]);
+      buttonMatrix.cells().objectAtIndex(i).setTag(i);
+    }
+
+    if (rows * columns > options.length) {
+      buttonMatrix.cells().objectAtIndex().setTransparent(true);
+      buttonMatrix.cells().objectAtIndex().setEnabled(false);
+    }
+    buttonMatrix.selectCellAtRow_column(selectedRow,selectedColumn);
+    return buttonMatrix;
+}
+
+// function createArtboard(context, obj) {
+//     var doc = context.document;
+
+//     var artboard = [MSArtboardGroup new];
+
+//     [artboard setName: obj.name];
+
+//     var frame = [artboard frame];
+
+//     [frame setX: obj.x];
+//     [frame setY: obj.y];
+//     [frame setWidth: obj.width];
+//     [frame setHeight: obj.height];
+
+//     [[doc currentPage] addLayer: artboard];
+
+//     return artboard;
+// }
 
 // zip(['-q','-r','-m','-o','-j','/Users/liuxinyu/Desktop/123.zip','/Users/liuxinyu/Desktop/123'])
 export function zip(args) {

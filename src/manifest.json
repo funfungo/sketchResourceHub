@@ -22,6 +22,42 @@
       }
     },
     {
+      "name": "标注",
+      "identifier": "miaow.my-Flag-identifier",
+      "script": "./Flag.js",
+      "shortcut": "command shift 2",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    },
+    {
+      "name": "字体替换",
+      "identifier": "miaow.my-FontReplace-identifier",
+      "script": "./FontReplace.js",
+      "shortcut": "",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    },
+    {
+      "name": "文字替换",
+      "identifier": "miaow.my-TextReplace-identifier",
+      "script": "./TextReplace.js",
+      "shortcut": "",
+      "handlers": {
+        "run": "onRun",
+        "actions": {
+          "Shutdown": "onShutdown"
+        }
+      }
+    },
+    {
       "name": "上传图标",
       "identifier": "miaow.my-UploadIcon-identifier",
   	  "script": "./UploadIcon.js",
@@ -110,6 +146,9 @@
     "title": "MiaoW",
     "items": [
       "miaow.my-Link-identifier",
+      "miaow.my-Flag-identifier",
+      "miaow.my-FontReplace-identifier",
+      "miaow.my-TextReplace-identifier",
       "miaow.my-UploadIcon-identifier",
       "miaow.my-IconList-identifier",
       "miaow.my-OpenSketch-identifier",

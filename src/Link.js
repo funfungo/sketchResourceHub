@@ -4,6 +4,7 @@ import { getWebview } from 'sketch-module-web-view/remote';
 import UI from 'sketch/ui';
 import sketch from 'sketch';
 const webviewIdentifier = 'sketchresourcehub.webview';
+import {rgb} from './util';
 
 var kPluginDomain = "com.sketchplugins.wechat.link";
 var lineColorKeyLink = "com.sketchplugins.wechat.linecolor";
@@ -17,29 +18,7 @@ var lineThicknessLink = NSUserDefaults.standardUserDefaults().objectForKey(lineT
 var linkObject;
 var destArtboard, linkLayer2;
 function getLink(context, s) {
-	function rgb(a) {
-		if(a.indexOf('rgba(') > -1){
-			var rgba = a.replace('rgba(','').replace(')','');
-			rgba = rgba.replace(/\s/g,"").split(',');
-			return rgba;
-		}else{
-			var sColor = a.toLowerCase();
-		    if (sColor.length === 4) {
-		        var sColorNew = "#";
-		        for (var i = 1; i < 4; i += 1) {
-		            sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
-		        }
-		        sColor = sColorNew;
-		    }
-		    //处理六位的颜色值
-		    var sColorChange = [];
-		    for (var i = 1; i < 7; i += 2) {
-		        sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
-		    }
-		    return sColorChange;
-		}
-	    
-	}
+
 	var i18 = {};
 
 
