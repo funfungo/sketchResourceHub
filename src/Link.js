@@ -1118,6 +1118,7 @@ function getLink(context, s) {
 
 	var drawConnections = function (connection, doc) {
 		var draw = drawPPP(connection.linkRect, connection.artboard, doc);
+		log(1);
 		log(draw);
 		doc.addLayers(draw);
 
