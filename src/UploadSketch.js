@@ -62,6 +62,8 @@ export default function () {
       output: previewPath,
       "save-for-web": true,
       "use-id-for-name": true,
+      formats: "jpg",
+      compression: 1.0,
       scales: 0.2 // preview img compress
     });
 
@@ -69,7 +71,7 @@ export default function () {
       //skip symbol master page
       if (page.isSymbolsPage()) return;
       imgAll.push(page.id); //记录所有page的id
-      let previewImg = previewPath + page.id + "@0.2x.png";
+      let previewImg = previewPath + page.id + "@0.2x.jpg";
       let url = NSURL.fileURLWithPath(previewImg),
         bitmap = NSData.alloc().initWithContentsOfURL(url),
         base64 = bitmap.base64EncodedStringWithOptions(0) + "";
@@ -88,8 +90,8 @@ export default function () {
     // generateHtml(tmpPath + "/html", document.selectedPage.id);
     // console.timeEnd("generate");
 
-    browserWindow.loadURL('https://wedesign.oa.com/uploadSketch?sketch=1');
-    // browserWindow.loadURL("http://localhost:8081/UploadSketch?sketch=1");
+    // browserWindow.loadURL('https://wedesign.oa.com/uploadSketch?sketch=1');
+    browserWindow.loadURL("http://localhost:8081/UploadSketch?sketch=1");
   });
 
 
@@ -120,6 +122,8 @@ export default function () {
         output: previewPath,
         "save-for-web": true,
         "use-id-for-name": true,
+        formats: "jpg",
+        compression: 0.7,
         scales: 1
       });
       imgIds = [document.selectedPage.id];
@@ -128,6 +132,8 @@ export default function () {
         output: previewPath,
         "save-for-web": true,
         "use-id-for-name": true,
+        formats: "jpg",
+        compression: 0.7,
         scales: 1,
       });
       imgIds = imgAll;
