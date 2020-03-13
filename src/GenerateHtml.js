@@ -109,7 +109,7 @@ export function generateHtml(tmpPath, currentPage) {
       let pageName = page.name;
       let pageObjectID = page.id;
       page.layers.forEach(layer => {
-        if (layer.type === "Artboard") {
+        if (layer.type === "Artboard" || layer.type === "Group") {
           let artboard = {
             pageName: pageName,
             pageObjectID: pageObjectID,
@@ -126,7 +126,9 @@ export function generateHtml(tmpPath, currentPage) {
           });
           data.artboards.push(artboard);
           sketch.export(layer, {
+            fileFormat: "jpg",
             output: path.join(tmpPath, "dist", "preview"),
+            progressive: true,
             "save-for-web": true,
             "use-id-for-name": true,
             scales: 2

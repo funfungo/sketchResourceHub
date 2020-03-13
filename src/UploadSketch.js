@@ -45,7 +45,7 @@ export default function () {
     selected: [],
     all: []
   };
-  //先保存文件, 每次保存文件hash会变化
+  //先保存文件
   document.save(err => {
     fileHash = String(
       NSFileManager.defaultManager()
@@ -85,6 +85,7 @@ export default function () {
         previewObj.selected.push(img);
       }
     });
+
     //debug
     // console.time("generate");
     // generateHtml(tmpPath + "/html", document.selectedPage.id);
@@ -139,7 +140,7 @@ export default function () {
       imgIds = imgAll;
     }
     console.timeEnd("export");
-
+    console.log(imgIds);
     util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
       if (type == 2) {
         console.time("generate");

@@ -6,7 +6,6 @@ import * as fs from '@skpm/fs';
 import path from '@skpm/path';
 
 
-//TODO
 function copy (src, dest) {
   let err = MOPointer.alloc().init();
   let fileManager = NSFileManager.defaultManager();
@@ -55,6 +54,5 @@ function generateIndexHtml (data, dest) {
 }
 
 export function generatePage (data, dest) {
-  copyAssets(dest);
   generateIndexHtml(data, path.join(dest,'dist'));
 }
