@@ -12,6 +12,8 @@ import {
 
 const webviewIdentifier = "sketchresourcehub.webview";
 const Document = require("sketch/dom").Document;
+const picFormat = "jpg";
+
 export default function () {
   const document = require("sketch/dom").getSelectedDocument();
   const documentId = document.id;
@@ -62,7 +64,7 @@ export default function () {
       output: previewPath,
       "save-for-web": true,
       "use-id-for-name": true,
-      formats: "jpg",
+      formats: picFormat,
       compression: 1.0,
       scales: 0.2 // preview img compress
     });
@@ -91,8 +93,8 @@ export default function () {
     // generateHtml(tmpPath + "/html", document.selectedPage.id);
     // console.timeEnd("generate");
 
-    // browserWindow.loadURL('https://wedesign.oa.com/uploadSketch?sketch=1');
-    browserWindow.loadURL("http://localhost:8081/UploadSketch?sketch=1");
+    browserWindow.loadURL('https://wedesign.oa.com/uploadSketch?sketch=1');
+    // browserWindow.loadURL("http://localhost:8081/UploadSketch?sketch=1");
   });
 
 
@@ -101,8 +103,7 @@ export default function () {
   });
 
   const webContents = browserWindow.webContents;
-  webContents.on("did-finish-load", () => {
-  });
+  webContents.on("did-finish-load", () => {});
   webContents.on("readyForData", () => {
     webContents
       .executeJavaScript(`previewSketch(${JSON.stringify(previewObj)})`)
@@ -116,14 +117,17 @@ export default function () {
     let sketchFileUrl = tmpPath + "/" + documentName;
     let imgIds;
 
-    // 导出上传页面两倍缩略图（文件大时耗时长，尽量单个页面上传）
     console.time("export");
+    webContents
+      .executeJavaScript("stage('导出缩略图...')")
+      .catch(console.error);
+
     if (selected === "selected") {
       sketch.export(document.selectedPage, {
         output: previewPath,
         "save-for-web": true,
         "use-id-for-name": true,
-        formats: "jpg",
+        formats: picFormat,
         compression: 0.7,
         scales: 1
       });
@@ -133,28 +137,37 @@ export default function () {
         output: previewPath,
         "save-for-web": true,
         "use-id-for-name": true,
-        formats: "jpg",
+        formats: picFormat,
         compression: 0.7,
         scales: 1,
       });
       imgIds = imgAll;
     }
     console.timeEnd("export");
-    console.log(imgIds);
+
+
+
     util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
       if (type == 2) {
+        webContents
+          .executeJavaScript("stage('导出标注中...')")
+          .catch(console.error);
         console.time("generate");
         generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "");
         //todo generate symbol icons
         console.timeEnd("generate");
       }
       // 压缩上传到web
+      webContents
+      .executeJavaScript("stage('打包中...')")
+      .catch(console.error);
       util.zipSketch([zipUrl, tmpPath]).then(() => {
         let data = util.encodeBase64(zipUrl);
         webContents
           .executeJavaScript(
             `callSketchUpload(${JSON.stringify({
             documentId: documentId,
+            format: picFormat,
             md5: fileHash,
             sketchContent: data,
             sketchName: documentName,

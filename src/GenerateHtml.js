@@ -126,7 +126,6 @@ export function generateHtml(tmpPath, currentPage) {
           });
           data.artboards.push(artboard);
           sketch.export(layer, {
-            fileFormat: "jpg",
             output: path.join(tmpPath, "dist", "preview"),
             progressive: true,
             "save-for-web": true,
