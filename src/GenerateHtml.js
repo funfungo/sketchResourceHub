@@ -95,11 +95,11 @@ function recursiveGenerateLayer(layers, extra) {
   }, [])
 }
 
-export function generateHtml(tmpPath, currentPage) {
+export function generateHtml(tmpPath, currentPage, opt) {
   let data = {
-    scale: "1",
-    unit: "px",
-    colorFormat: "color-hex",
+    scale: opt.scale || "1",
+    unit: opt.unit || "px",
+    colorFormat: opt.colorFormat || "color-hex",
     artboards: []
   };
   let NAME_MAP = {};

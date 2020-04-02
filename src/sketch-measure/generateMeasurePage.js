@@ -53,6 +53,16 @@ function generateIndexHtml (data, dest) {
   }
 }
 
+function exportData(data, dest){
+  let dataStr =  NSMutableString.stringWithString(JSON.stringify(data, null, 2));
+  let err = MOPointer.alloc().init();
+  dataStr.writeToFile_atomically_encoding_error(path.join(dest,'data.json'), true, NSUTF8StringEncoding, err);
+  if (err.value() !== null) {
+    console.log(String(err.value()));
+  }
+}
+
 export function generatePage (data, dest) {
+  exportData(data, path.join(dest, 'dist')); //将data导出为json文件
   generateIndexHtml(data, path.join(dest,'dist'));
 }

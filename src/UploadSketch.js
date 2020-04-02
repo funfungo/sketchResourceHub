@@ -27,7 +27,7 @@ export default function () {
     modal: true,
     identifier: webviewIdentifier,
     width: 400,
-    height: 900,
+    height: 1000,
     show: false,
     frame: false,
     titleBarStyle: "hiddenInset",
@@ -112,6 +112,10 @@ export default function () {
   webContents.on("sketchUpload", s => {
     // 交互or视觉
     let type = s.type || 1; //1：交互 2：视觉
+    let opt = {
+      scale: s.scale || "1",
+      unit: s.unit || "px"
+    }
     // 选中页面or全部页面
     let selected = s.page || "selected";
     let sketchFileUrl = tmpPath + "/" + documentName;
@@ -153,7 +157,7 @@ export default function () {
           .executeJavaScript("stage('导出标注中...')")
           .catch(console.error);
         console.time("generate");
-        generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "");
+        generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "", opt);
         //todo generate symbol icons
         console.timeEnd("generate");
       }
