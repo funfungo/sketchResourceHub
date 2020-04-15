@@ -93,8 +93,8 @@ export default function () {
     // generateHtml(tmpPath + "/html", document.selectedPage.id);
     // console.timeEnd("generate");
 
-    browserWindow.loadURL('https://wedesign.oa.com/uploadSketch?sketch=1');
-    // browserWindow.loadURL("http://localhost:8081/UploadSketch?sketch=1");
+    browserWindow.loadURL('https://wedesign.oa.com/uploadSketch');
+    // browserWindow.loadURL("http://localhost:8081/UploadSketch");
   });
 
 

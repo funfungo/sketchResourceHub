@@ -79,12 +79,12 @@ function recursiveGenerateLayer(layers, extra) {
     }
     appendCss(layerInfo);
     acc.push(layerInfo)
-    if (layer.type === "SymbolInstance") {
-      acc = acc.concat(transformSymbol(layer, {
-        artboard: extra.artboard,
-        parentPos: layerInfo.rect
-      }));
-    }
+    // if (layer.type === "SymbolInstance") {
+    //   acc = acc.concat(transformSymbol(layer, {
+    //     artboard: extra.artboard,
+    //     parentPos: layerInfo.rect
+    //   }));
+    // }
     if (layer.layers) {
       acc = acc.concat(recursiveGenerateLayer(layer.layers, {
         artboard: extra.artboard,
