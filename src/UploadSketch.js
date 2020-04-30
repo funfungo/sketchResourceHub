@@ -21,7 +21,8 @@ export default function () {
     document.path.substr(document.path.lastIndexOf("/") + 1)
   );
   console.log(documentId);
-
+  const pages = document.pages;
+  const selectedPage = document.selectedPage;
   const options = {
     parent: sketch.getSelectedDocument(),
     modal: true,
@@ -34,11 +35,11 @@ export default function () {
     minimizable: false,
     maximizable: false
   };
-
   const browserWindow = new BrowserWindow(options);
   let fileHash;
   let imgAll = [];
   let tmpPath, zipUrl, previewPath;
+  let pageId, pageName;
 
   let previewObj = {
     documentId: documentId,
@@ -47,56 +48,51 @@ export default function () {
     selected: [],
     all: []
   };
-  //先保存文件
-  document.save(err => {
-    fileHash = String(
-      NSFileManager.defaultManager()
-      .contentsAtPath(decodeURIComponent(document.path))
-      .sha1AsString()
-    );
-    tmpPath = "/tmp/" + documentId + "_" + fileHash;
-    previewObj.md5 = fileHash;
-    zipUrl = tmpPath + ".zip";
-    previewPath = tmpPath + "/preview/";
-
-    //export page preview
-    sketch.export(document.pages, {
-      output: previewPath,
-      "save-for-web": true,
-      "use-id-for-name": true,
-      formats: picFormat,
-      compression: 1.0,
-      scales: 0.2 // preview img compress
-    });
-
-    document.pages.forEach(page => {
-      //skip symbol master page
-      if (page.isSymbolsPage()) return;
-      imgAll.push(page.id); //记录所有page的id
-      let previewImg = previewPath + page.id + "@0.2x.jpg";
+  try {
+    //先保存文件
+    document.save(err => {
+      fileHash = String(
+        NSFileManager.defaultManager()
+        .contentsAtPath(decodeURIComponent(document.path))
+        .sha1AsString()
+      );
+      tmpPath = "/tmp/" + documentId + "_" + fileHash;
+      previewObj.md5 = fileHash;
+      zipUrl = tmpPath + ".zip";
+      previewPath = tmpPath + "/preview/";
+      pageId = document.selectedPage.id;
+      pageName = document.selectedPage.name;
+      // 先去掉不需要上传的页面
+      document.pages.forEach(page => {
+        if (page.id === pageId || page.isSymbolsPage()) {
+          return;
+        };
+        page.remove();
+      })
+      //export page preview
+      sketch.export(document.selectedPage, {
+        output: previewPath,
+        "save-for-web": true,
+        "use-id-for-name": true,
+        formats: picFormat,
+        compression: 1.0,
+        scales: 0.2 // preview img compress
+      });
+      let previewImg = `${previewPath}${pageId}@0.2x.jpg`;
       let url = NSURL.fileURLWithPath(previewImg),
         bitmap = NSData.alloc().initWithContentsOfURL(url),
         base64 = bitmap.base64EncodedStringWithOptions(0) + "";
-
       let img = {
-        name: page.id,
+        name: pageId,
         base64: "data:image/jpg;base64," + base64
       };
-      previewObj.all.push(img);
-      if (page.selected) {
-        previewObj.selected.push(img);
-      }
+      previewObj.selected.push(img);
+      // browserWindow.loadURL('https://wedesign.oa.com/uploadSketch');
+      browserWindow.loadURL("http://localhost:8081/UploadSketch");
     });
-
-    //debug
-    // console.time("generate");
-    // generateHtml(tmpPath + "/html", document.selectedPage.id);
-    // console.timeEnd("generate");
-
-    browserWindow.loadURL('https://wedesign.oa.com/uploadSketch');
-    // browserWindow.loadURL("http://localhost:8081/UploadSketch");
-  });
-
+  } catch (err) {
+    console.error(err);
+  }
 
   browserWindow.once("ready-to-show", () => {
     browserWindow.show();
@@ -118,10 +114,9 @@ export default function () {
     }
     // 选中页面or全部页面
     let selected = s.page || "selected";
-    let sketchFileUrl = tmpPath + "/" + documentName;
+    let taskName = s.taskName; // sketch file与task同名;
+    let sketchFileUrl = tmpPath + "/" + taskName + ".sketch";
     let imgIds;
-
-    console.time("export");
     webContents
       .executeJavaScript("stage('导出缩略图...')")
       .catch(console.error);
@@ -147,11 +142,16 @@ export default function () {
       });
       imgIds = imgAll;
     }
-    console.timeEnd("export");
 
+    webContents
+      .executeJavaScript("stage('打包中...')")
+      .catch(console.error);
 
-
-    util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
+    console.time("time");
+    document.save(sketchFileUrl, {
+      saveMode: Document.SaveMode.SaveTo,
+    }, err => {
+      console.timeEnd("time");
       if (type == 2) {
         webContents
           .executeJavaScript("stage('导出标注中...')")
@@ -161,27 +161,23 @@ export default function () {
         //todo generate symbol icons
         console.timeEnd("generate");
       }
-      // 压缩上传到web
-      webContents
-      .executeJavaScript("stage('打包中...')")
-      .catch(console.error);
+
       util.zipSketch([zipUrl, tmpPath]).then(() => {
         let data = util.encodeBase64(zipUrl);
         webContents
           .executeJavaScript(
             `callSketchUpload(${JSON.stringify({
-            documentId: documentId,
-            format: picFormat,
-            md5: fileHash,
-            sketchContent: data,
-            sketchName: documentName,
-            imgIds: imgIds
-          })})`
+          documentId: documentId,
+          format: picFormat,
+          md5: fileHash,
+          sketchContent: data,
+          sketchName: `${taskName}.sketch`,
+          imgIds: imgIds
+        })})`
           )
           .catch(console.error);
       });
-    })
-
+    });
   });
 
   webContents.on("openURL", s => {
@@ -191,9 +187,10 @@ export default function () {
   webContents.on("closeWindow", s => {
     NSFileManager.defaultManager().removeItemAtPath_error(tmpPath, nil);
     NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
+    document.pages = pages;
+    document.selectedPage = selectedPage;
     browserWindow.close();
   });
-
 }
 
 export function onShutdown() {
