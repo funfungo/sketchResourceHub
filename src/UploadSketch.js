@@ -12,8 +12,12 @@ import {
 
 const webviewIdentifier = "sketchresourcehub.webview";
 const Document = require("sketch/dom").Document;
+const Settings = require('sketch/settings')
 const picFormat = "jpg";
-
+if (!Settings.settingForKey('scale')) {
+  Settings.setSettingForKey('scale', 1)
+  Settings.setSettingForKey('unit', "px")
+}
 export default function () {
   const document = require("sketch/dom").getSelectedDocument();
   const documentId = document.id;
@@ -21,14 +25,15 @@ export default function () {
     document.path.substr(document.path.lastIndexOf("/") + 1)
   );
   console.log(documentId);
+  const dateTag = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const pages = document.pages;
   const selectedPage = document.selectedPage;
   const options = {
     parent: sketch.getSelectedDocument(),
     modal: true,
     identifier: webviewIdentifier,
-    width: 400,
-    height: 1000,
+    width: 320,
+    height: 785,
     show: false,
     frame: false,
     titleBarStyle: "hiddenInset",
@@ -39,13 +44,16 @@ export default function () {
   let fileHash;
   let imgAll = [];
   let tmpPath, zipUrl, previewPath;
-  let pageId, pageName;
+  let pageId;
 
   let previewObj = {
     documentId: documentId,
     documentName: documentName,
+    scale: Settings.settingForKey("scale") || 1,
+    unit: Settings.settingForKey("unit") || "px",
     md5: "",
     selected: [],
+    pageName: document.selectedPage.name,
     all: []
   };
   try {
@@ -61,7 +69,6 @@ export default function () {
       zipUrl = tmpPath + ".zip";
       previewPath = tmpPath + "/preview/";
       pageId = document.selectedPage.id;
-      pageName = document.selectedPage.name;
       // 先去掉不需要上传的页面
       document.pages.forEach(page => {
         if (page.id === pageId || page.isSymbolsPage()) {
@@ -108,6 +115,10 @@ export default function () {
   webContents.on("sketchUpload", s => {
     // 交互or视觉
     let type = s.type || 1; //1：交互 2：视觉
+    if (s.scale && s.unit) {
+      console.log("save config");
+      saveConfig(s.scale, s.unit);
+    }
     let opt = {
       scale: s.scale || "1",
       unit: s.unit || "px"
@@ -115,7 +126,7 @@ export default function () {
     // 选中页面or全部页面
     let selected = s.page || "selected";
     let taskName = s.taskName; // sketch file与task同名;
-    let sketchFileUrl = tmpPath + "/" + taskName + ".sketch";
+    let sketchFileUrl = `${tmpPath}/${taskName}${dateTag}.sketch`;
     let imgIds;
     webContents
       .executeJavaScript("stage('导出缩略图...')")
@@ -162,6 +173,7 @@ export default function () {
         console.timeEnd("generate");
       }
 
+
       util.zipSketch([zipUrl, tmpPath]).then(() => {
         let data = util.encodeBase64(zipUrl);
         webContents
@@ -170,8 +182,9 @@ export default function () {
           documentId: documentId,
           format: picFormat,
           md5: fileHash,
+          taskName: taskName,
           sketchContent: data,
-          sketchName: `${taskName}.sketch`,
+          sketchName: `${taskName}${dateTag}.sketch`,
           imgIds: imgIds
         })})`
           )
@@ -193,9 +206,17 @@ export default function () {
   });
 }
 
+
 export function onShutdown() {
   const existingWebview = getWebview(webviewIdentifier);
   if (existingWebview) {
     existingWebview.close();
   }
 }
+
+function saveConfig(scale, unit) {
+  Settings.setSettingForKey('scale', scale);
+  Settings.setSettingForKey('unit', unit);
+}
+
+
