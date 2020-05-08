@@ -1,13 +1,13 @@
 {
-  "name": "MiaoW",
+  "name": "WeCloud",
   "version": "0.0.2",
   "engines": {
     "sketch": ">=3.0"
   },
   "skpm": {
-    "name": "MiaoW",
+    "name": "WeCloud",
     "manifest": "src/manifest.json",
-    "main": "MiaoW.sketchplugin",
+    "main": "WeCloud.sketchplugin",
     "assets": [
       "assets/**/*"
     ],
