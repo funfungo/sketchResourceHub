@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.2",
   "commands": [
     {
       "script" : "onAction.js",
@@ -95,15 +95,9 @@
     }
   ],
   "menu": {
-    "title": "MiaoW",
+    "title": "WeCloud",
     "items": [
-      "miaow.my-UploadIcon-identifier",
-      "miaow.my-IconList-identifier",
-      "miaow.my-OpenSketch-identifier",
-      "miaow.my-UploadSketch-identifier",
-      "miaow.my-UIKit-identifier",
-      "miaow.my-SyncSketch-identifier",
-      "miaow.my-ToolBar-identifier"
+      "miaow.my-UploadSketch-identifier"
     ]
   }
 }

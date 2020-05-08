@@ -63,6 +63,7 @@ function exportData(data, dest){
 }
 
 export function generatePage (data, dest) {
+  copyAssets(dest);
   exportData(data, path.join(dest, 'dist')); //将data导出为json文件
   generateIndexHtml(data, path.join(dest,'dist'));
 }

@@ -1,5 +1,4 @@
 import * as fs from "@skpm/fs";
-
 import BrowserWindow from "sketch-module-web-view";
 import {
   getWebview
@@ -10,10 +9,11 @@ import {
   generateHtml
 } from "./GenerateHtml";
 
-const webviewIdentifier = "sketchresourcehub.webview";
+const webviewIdentifier = "wecloud.webview";
 const Document = require("sketch/dom").Document;
 const Settings = require('sketch/settings')
 const picFormat = "jpg";
+let tmpPath, zipUrl;
 if (!Settings.settingForKey('scale')) {
   Settings.setSettingForKey('scale', 1)
   Settings.setSettingForKey('unit', "px")
@@ -26,24 +26,24 @@ export default function () {
   );
   console.log(documentId);
   const dateTag = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const pages = document.pages;
-  const selectedPage = document.selectedPage;
   const options = {
     parent: sketch.getSelectedDocument(),
-    modal: true,
+    // modal: true,
     identifier: webviewIdentifier,
     width: 320,
     height: 785,
     show: false,
-    frame: false,
-    titleBarStyle: "hiddenInset",
+    // frame: false,
+    // titleBarStyle: "hiddenInset",
+    movable: true,
+    alwaysOnTop: true,
     minimizable: false,
     maximizable: false
   };
   const browserWindow = new BrowserWindow(options);
   let fileHash;
   let imgAll = [];
-  let tmpPath, zipUrl, previewPath;
+  let previewPath;
   let pageId = document.selectedPage.id;
 
   let previewObj = {
@@ -80,7 +80,6 @@ export default function () {
         scales: 0.2 // preview img compress
       });
       let previewImg = `${previewPath}${pageId}@0.2x.jpg`;
-      console.log(previewImg);
       let url = NSURL.fileURLWithPath(previewImg),
         bitmap = NSData.alloc().initWithContentsOfURL(url),
         base64 = bitmap.base64EncodedStringWithOptions(0) + "";
@@ -91,8 +90,6 @@ export default function () {
       previewObj.selected.push(img);
       browserWindow.loadURL('https://wedesign.oa.com/uploadSketch');
       // browserWindow.loadURL("http://localhost:8081/UploadSketch");
-
-
     });
   } catch (err) {
     console.error(err);
@@ -110,15 +107,6 @@ export default function () {
       .catch(console.error);
   })
   webContents.on("sketchUpload", s => {
-    // 先去掉不需要上传的页面
-    document.pages.forEach(page => {
-      if (page.id === pageId || page.isSymbolsPage()) {
-        return;
-      };
-      page.remove();
-    })
-    document.selectedPage = selectedPage;
-
     try {
       // 交互or视觉
       let type = s.type || 1; //1：交互 2：视觉
@@ -133,7 +121,8 @@ export default function () {
       // 选中页面or全部页面
       let selected = s.page || "selected";
       let taskName = s.taskName; // sketch file与task同名;
-      let sketchFileUrl = `${tmpPath}/${taskName}${dateTag}.sketch`;
+      // let taskName = documentName.split(".")[0];
+      let sketchFileUrl = `${tmpPath}/${documentName}`;
       let imgIds;
       webContents
         .executeJavaScript("stage('导出缩略图...')")
@@ -161,24 +150,22 @@ export default function () {
         imgIds = imgAll;
       }
       webContents
-        .executeJavaScript("stage('打包中...')")
+        .executeJavaScript("stage('导出中...')")
         .catch(console.error);
       console.time("time");
       document.save(sketchFileUrl, {
         saveMode: Document.SaveMode.SaveTo,
       }, err => {
         console.timeEnd("time");
-        document.pages = pages;
-        document.selectedPage = selectedPage;
         if (type == 2) {
-          webContents
-            .executeJavaScript("stage('导出标注中...')")
-            .catch(console.error);
           console.time("generate");
           generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "", opt);
           //todo generate symbol icons
           console.timeEnd("generate");
         }
+        webContents
+        .executeJavaScript("stage('打包中...')")
+        .catch(console.error);
         util.zipSketch([zipUrl, tmpPath]).then(() => {
           let data = util.encodeBase64(zipUrl);
           webContents
@@ -189,7 +176,7 @@ export default function () {
           md5: fileHash,
           taskName: taskName,
           sketchContent: data,
-          sketchName: `${taskName}${dateTag}.sketch`,
+          sketchName: documentName,
           imgIds: imgIds
         })})`
             )
@@ -215,21 +202,22 @@ export default function () {
   webContents.on("closeWindow", s => {
     NSFileManager.defaultManager().removeItemAtPath_error(tmpPath, nil);
     NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
-    document.pages = pages;
-    document.selectedPage = selectedPage;
     browserWindow.close();
   });
-
-  function onShutdown() {
-    NSFileManager.defaultManager().removeItemAtPath_error(tmpPath, nil);
-    NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
-    document.pages = pages;
-    document.selectedPage = selectedPage;
-    browserWindow.close();
-  }
 }
+
+
 
 function saveConfig(scale, unit) {
   Settings.setSettingForKey('scale', scale);
   Settings.setSettingForKey('unit', unit);
+}
+
+export function onShutdown() {
+  NSFileManager.defaultManager().removeItemAtPath_error(tmpPath, nil);
+  NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
+  const existingWebview = getWebview(webviewIdentifier);
+  if (existingWebview) {
+    existingWebview.close();
+  }
 }
