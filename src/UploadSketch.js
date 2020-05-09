@@ -34,7 +34,8 @@ export default function () {
     height: 785,
     show: false,
     // frame: false,
-    // titleBarStyle: "hiddenInset",
+    // titleBarStyle: "hidden",
+    remembersWindowFrame: true,
     movable: true,
     alwaysOnTop: true,
     minimizable: false,
@@ -88,8 +89,8 @@ export default function () {
         base64: "data:image/jpg;base64," + base64
       };
       previewObj.selected.push(img);
-      browserWindow.loadURL('https://wedesign.oa.com/uploadSketch');
-      // browserWindow.loadURL("http://localhost:8081/UploadSketch");
+      let webviewUrl = process.env.NODE_ENV === "development" ? "http://localhost:8081/UploadSketch" : "https://wedesign.oa.com/uploadSketch"
+      browserWindow.loadURL(webviewUrl);
     });
   } catch (err) {
     console.error(err);
@@ -98,6 +99,11 @@ export default function () {
   browserWindow.once("ready-to-show", () => {
     browserWindow.show();
   });
+
+  browserWindow.once("closed", () => {
+    NSFileManager.defaultManager().removeItemAtPath_error(tmpPath, nil);
+    NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
+  })
 
   const webContents = browserWindow.webContents;
   webContents.on("did-finish-load", () => {});
