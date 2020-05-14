@@ -159,9 +159,7 @@ export default function () {
         .executeJavaScript("stage('导出中...')")
         .catch(console.error);
       console.time("time");
-      document.save(sketchFileUrl, {
-        saveMode: Document.SaveMode.SaveTo,
-      }, err => {
+      util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
         console.timeEnd("time");
         if (type == 2) {
           console.time("generate");
@@ -170,8 +168,8 @@ export default function () {
           console.timeEnd("generate");
         }
         webContents
-        .executeJavaScript("stage('打包中...')")
-        .catch(console.error);
+          .executeJavaScript("stage('打包中...')")
+          .catch(console.error);
         util.zipSketch([zipUrl, tmpPath]).then(() => {
           let data = util.encodeBase64(zipUrl);
           webContents
@@ -192,7 +190,7 @@ export default function () {
         }).catch(err => {
           console.error(err);
         });
-      });
+      })
     } catch (err) {
       webContents
         .executeJavaScript("emitError('出错啦...')")
@@ -211,7 +209,6 @@ export default function () {
     browserWindow.close();
   });
 }
-
 
 
 function saveConfig(scale, unit) {
