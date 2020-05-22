@@ -95,7 +95,7 @@ export default function () {
         base64: "data:image/jpg;base64," + base64
       };
       previewObj.selected.push(img);
-      let webviewUrl = process.env.NODE_ENV === "development" ? "http://localhost:8081/UploadSketch" : "https://wedesign.oa.com/uploadSketch"
+      let webviewUrl = process.env.NODE_ENV === "development" ? "http://localhost:8081/UploadSketch" : "http://cloud.wedesign.oa.com/uploadSketch"
       browserWindow.loadURL(webviewUrl);
     });
   } catch (err) {
