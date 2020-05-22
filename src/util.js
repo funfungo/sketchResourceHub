@@ -48,15 +48,8 @@ export function loadDocFromSketchFile(filePath) {
       NSURL.fileURLWithPath(filePath),
       'com.bohemiancoding.sketch.drawing',
       null);
-  
-  return doc;
-}
 
-export function getLayerImage(context, layer) {
-  let tempPath = NSTemporaryDirectory().stringByAppendingPathComponent(
-      NSUUID.UUID().UUIDString() + '.png');
-  captureLayerImage(context.document, layer, tempPath);
-  return NSImage.alloc().initWithContentsOfFile(tempPath);
+  return doc;
 }
 
 export function captureLayerImage(context, layer, destPath, type) {
@@ -101,21 +94,7 @@ export function mkdirpSync(path, mode) {
   }
 }
 
-export function findSymbolMaster(context) {
-  var pages = context.document.pages();
-  var ret = [];
-  for (var i = 0; i < pages.count(); i++) {
-    if(pages.objectAtIndex(i).name() == 'Symbols'){
-      var symbols = pages.objectAtIndex(i).layers();
-      for (var k = 0; k < symbols.count(); k++) {
-        if(symbols.objectAtIndex(k).className() == 'MSSymbolMaster'){
-          ret.push(symbols.objectAtIndex(k));
-        }
-      }
-    }
-  }
-  return ret;
-}
+
 
 export function findPagesMaster(context) {
   var page = context.document.currentPage();
@@ -132,7 +111,7 @@ export function findPagesMaster(context) {
     }else if(symbols.objectAtIndex(k).className() == 'MSSymbolInstance'){
       ret.push(symbols.objectAtIndex(k))
     }
-    
+
   }
   return ret;
 }
@@ -144,14 +123,6 @@ export function encodeBase64(filePath) {
 }
 
 export function saveSketchFile(args) {
- // var document = require('sketch/dom').getSelectedDocument();
- //  var Document = require('sketch/dom').Document;
- //  document.save(filePath,{
- //    saveMode: Document.SaveMode.SaveTo
- //  }, ()=> {
- //    func();
- //  })
-
   return new Promise((resolve, reject) => {
     const task = child_process.spawn('cp', [
       args[0],
@@ -174,7 +145,6 @@ export function zipSketch(args) {
     const task = child_process.spawn('zip', [
       '-q',
       '-r',
-      '-m',
       args[0],
       args[1]
     ]);

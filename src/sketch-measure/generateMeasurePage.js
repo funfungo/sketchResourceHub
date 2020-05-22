@@ -6,7 +6,6 @@ import * as fs from '@skpm/fs';
 import path from '@skpm/path';
 
 
-//TODO
 function copy (src, dest) {
   let err = MOPointer.alloc().init();
   let fileManager = NSFileManager.defaultManager();
@@ -48,8 +47,16 @@ function generateIndexHtml (data, dest) {
   }
   const html = INDEX_HTML.replace(/__data__/, JSON.stringify(data, null, 2))
   const nsHtml = NSMutableString.stringWithString(html);
-  console.log(dest);
   nsHtml.writeToFile_atomically_encoding_error(path.join(dest,'index.html'), true, NSUTF8StringEncoding, err);
+  if (err.value() !== null) {
+    console.log(String(err.value()));
+  }
+}
+
+function exportData(data, dest){
+  let dataStr =  NSMutableString.stringWithString(JSON.stringify(data, null, 2));
+  let err = MOPointer.alloc().init();
+  dataStr.writeToFile_atomically_encoding_error(path.join(dest,'data.json'), true, NSUTF8StringEncoding, err);
   if (err.value() !== null) {
     console.log(String(err.value()));
   }
@@ -57,5 +64,6 @@ function generateIndexHtml (data, dest) {
 
 export function generatePage (data, dest) {
   copyAssets(dest);
+  exportData(data, path.join(dest, 'dist')); //将data导出为json文件
   generateIndexHtml(data, path.join(dest,'dist'));
 }

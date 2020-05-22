@@ -160,17 +160,6 @@ export function loadDocFromSketchFile(filePath) {
 
 
 /**
- * Returns an NSImage for the given layer in the given document.
- */
-export function getLayerImage(document, layer) {
-  let tempPath = NSTemporaryDirectory().stringByAppendingPathComponent(
-      NSUUID.UUID().UUIDString() + '.png');
-  captureLayerImage(document, layer, tempPath);
-  return NSImage.alloc().initWithContentsOfFile(tempPath);
-}
-
-
-/**
  * Saves the given layer in the given document to a PNG file at the given path.
  */
 export function captureLayerImage(document, layer, destPath) {

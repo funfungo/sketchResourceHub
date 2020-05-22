@@ -1,24 +1,24 @@
 {
-  "name": "MiaoW",
-  "version": "0.0.1",
+  "name": "WeCloud",
+  "version": "0.0.2",
   "engines": {
     "sketch": ">=3.0"
   },
   "skpm": {
-    "name": "MiaoW",
+    "name": "WeCloud",
     "manifest": "src/manifest.json",
-    "main": "MiaoW.sketchplugin",
+    "main": "WeCloud.sketchplugin",
     "assets": [
       "assets/**/*"
     ],
     "sketch-assets-file": "sketch-assets/icons.sketch"
   },
   "scripts": {
-    "build": "./skpm-build-web.js",
-    "watch": "skpm-build --watch",
+    "build": "NODE_ENV=production ./skpm-build-web.js",
+    "watch": "NODE_ENV=development skpm-build --watch",
     "start": "skpm-build --watch",
     "postinstall": "npm run build && skpm-link",
-    "watch-web": "./skpm-build-web.js --watch"
+    "watch-web": "NODE_ENV=development ./skpm-build-web.js --watch"
   },
   "devDependencies": {
     "@skpm/builder": "^0.5.11",
@@ -37,7 +37,7 @@
   ],
   "dependencies": {
     "html-webpack-plugin": "^3.2.0",
-    "sketch-module-web-view": "^3.0.1",
+    "sketch-module-web-view": "^3.4.1",
     "webpack-glob-entry": "^2.1.1"
   },
   "author": "nikkifang doubleluo"

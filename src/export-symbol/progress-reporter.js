@@ -23,9 +23,7 @@ export class ProgressReporter extends EventEmitter {
     }
 
     return (
-      (this.childReporters.reduce((acc, child) => acc + child.progress, 0) +
-        this.counter) /
-      (this.total + this.childReporters.length)
+      (this.childReporters.reduce((acc, child) => acc + child.progress, 0) + this.counter) / (this.total + this.childReporters.length)
     );
   }
 

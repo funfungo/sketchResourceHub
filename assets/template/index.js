@@ -264,7 +264,7 @@ I18N['zh-cn'] = {
             this.events();
         },
         screen: function() {
-            var imageData = (this.current.imageBase64)? this.current.imageBase64: this.current.imagePath + '?' + timestamp;
+            var imageData = (this.current.imageBase64)? this.current.imageBase64: this.current.imagePath;
 
             if(!this.maxSize){
                 var screenSize = (this.current.width > this.current.height)? this.current.width: this.current.height,
@@ -445,7 +445,7 @@ I18N['zh-cn'] = {
                 pagesData[artboard.pageObjectID].count++;
                 var classNames = (self.artboardIndex == index && !artboard.fileName)? ' active': '',
                     fileName = (artboard.fileName)? ' data-file="' + artboard.fileName + '"': '',
-                    imageData = (artboard.imageBase64)? artboard.imageBase64: artboard.imagePath + '?' + timestamp;
+                    imageData = (artboard.imageBase64)? artboard.imageBase64: artboard.imagePath;
                 artboardListHTML.push(
                         '<li id="artboard-' + index + '"' + fileName + ' class="artboard' + classNames + '" data-page-id="' + artboard.pageObjectID + '" data-id="' + artboard.objectID + '" data-index="' + index + '" >',
                             '<picture class="preview-img" data-name="' + artboard.name + '">',
@@ -506,7 +506,7 @@ I18N['zh-cn'] = {
                     var asset = JSON.parse( JSON.stringify( sliceLayer.exportable ) ).pop();
                     sliceListHTML.push(
                         '<li id="slice-' + sliceLayer.objectID + '" class="slice-layer" data-objectId="' + sliceLayer.objectID + '">',
-                            '<picture><img src="' +  'assets/' + asset.path + '?' + timestamp + '" alt=""></picture>',
+                            '<picture><img src="' + asset.path + '" alt=""></picture>',
                             '<div>',
                                 '<h3>' + sliceLayer.name + '</h3>',
                                 '<small>' + self.unitSize(sliceLayer.rect.width) + ' × ' + self.unitSize(sliceLayer.rect.height) + '</small>',
@@ -802,7 +802,7 @@ I18N['zh-cn'] = {
                     if (fill.fillType == "color") {
                         fills.push( self.colorItem(fill.color) );
                     }
-                    else{
+                    else if(fill.fillType == "gradient"){
                         fills.push('<div class="gradient">');
                         $.each(fill.gradient.colorStops, function(index, gradient) {
                             fills.push(self.colorItem(gradient.color));
@@ -906,12 +906,12 @@ I18N['zh-cn'] = {
             // CODE TEMPLATE
             var tab = [
                 '<ul class="tab" id="code-tab" >',
-                '<li class="icon-rncss-panel" data-id="rncss-panel" data-codeType="rncss" ></li>',
+                // '<li class="icon-rncss-panel" data-id="rncss-panel" data-codeType="rncss" ></li>',
                 '<li class="icon-css-panel" data-id="css-panel" data-codeType="css" ></li>',
                 '<li class="icon-android-panel" data-id="android-panel" data-codeType="android" ></li>',
                 '<li class="icon-ios-panel" data-id="ios-panel" data-codeType="ios" ></li>',
                 '</ul>'].join('')
-            
+
             var css = [];
             var css = [
                 '<div id="css-panel" class="code-item item">',
@@ -919,10 +919,10 @@ I18N['zh-cn'] = {
                 '</div>'].join('')
 
             var rncss = [];
-            var rncss = [
-                '<div id="rncss-panel" class="code-item item">',
-                '<label><textarea id="rncss" rows="' + (layerData.rncss.length + 1) + '" readonly="readonly">' + layerData.rncss.join("\r\n") + '</textarea></label>',
-                '</div>'].join('')
+            // var rncss = [
+            //     '<div id="rncss-panel" class="code-item item">',
+            //     '<label><textarea id="rncss" rows="' + (layerData.rncss.length + 1) + '" readonly="readonly">' + layerData.rncss.join("\r\n") + '</textarea></label>',
+            //     '</div>'].join('')
 
             var android = [];
             if(layerData.type == "text"){
@@ -992,14 +992,15 @@ I18N['zh-cn'] = {
                 );
             }
             html.push(this.propertyType('CODE TEMPLATE', [ tab, rncss, css, android.join(''), ios.join('') ].join(''), true));
-            
+
             //  EXPORTABLE
             if(layerData.exportable && layerData.exportable.length > 0){
-                var expHTML = [],
-                    path = 'assets/'
+                var expHTML = [];
+
+                let slice = this.project.slices.find(slice => slice.id === layerData.id);
                 expHTML.push('<ul class="exportable">')
                 $.each(layerData.exportable, function(index, exportable) {
-                    var filePath = path + exportable.path;
+                    var filePath =  slice.exportable[index].path;
                     expHTML.push(
                         '<li>',
                             '<a href="' + filePath + '" data-format="' + exportable.format.toUpperCase() + '"><img src="' + filePath + '" alt="' + exportable.path + '">' + exportable.path.replace('drawable-', '') + '</a>',

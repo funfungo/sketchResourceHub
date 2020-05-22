@@ -93,3 +93,7 @@ You will need to specify a `repository` in the `package.json`:
 +  }
 ...
 ```
+
+
+##备注：
+sketch 上传时只能选中一个page或者选择全部上传
