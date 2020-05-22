@@ -14,7 +14,8 @@ import {
 import {
   transformStyle,
   transformFrame,
-  transformText
+  transformText,
+  transformExportable
 } from "./sketch-measure/transform";
 import {
   appendCss
@@ -30,16 +31,28 @@ const documentData = context.document.documentData();
  * @param {Object} rect
  * @returns
  */
-function outRange(range, rect){
+function outRange(range, rect) {
   return rect.x > range.width || rect.y > range.height || rect.x + rect.width < 0 || rect.y + rect.height < 0
 }
+
+/**
+ * detect whether a rect is out sight of a frame
+ *
+ * @param {Object} frame
+ * @param {Object} rect
+ * @returns
+ */
+function outFrame(frame, rect) {
+  return rect.x > frame.x + frame.width || rect.y > frame.y + frame.height || rect.x + rect.width < frame.x || rect.y + rect.height < frame.y;
+}
+
 /**
  * get nested symbolInstance style
  * @param {Object} layer symbolInstance
  * @param {Object} extra
  * @returns
  */
-function transformSymbol(layer,extra) {
+function transformSymbol(layer, extra) {
   let symbolInstance = layer.sketchObject;
   let symbolID = symbolInstance.symbolID();
   let immutableInstance = symbolInstance.immutableModelObject();
@@ -59,7 +72,7 @@ function transformSymbol(layer,extra) {
  * @param {Object} extra parent position used to calculate nested layer frame position
  * @returns {Array} layers data array
  */
-function recursiveGenerateLayer(layers, extra) {
+function recursiveGenerateLayer(layers, extra, data, tmpPath) {
   return layers.reduce((acc, layer) => {
     if (layer.hidden) return acc
     let layerInfo = {
@@ -70,12 +83,34 @@ function recursiveGenerateLayer(layers, extra) {
     }
     transformFrame(layer, layerInfo, extra.parentPos || {})
     // 忽略artboard中不可见的元素
-    if(extra.artboard && outRange(extra.artboard, layerInfo.rect)){
+    if (extra.artboard && outRange(extra.artboard, layerInfo.rect)) {
       return acc;
     }
     transformStyle(layer, layerInfo);
     if (layer.type === "Text") {
       transformText(layer, layerInfo);
+    }
+    if (layer.exportFormats.length > 0) {
+      transformExportable(layer, layerInfo);
+      if (layerInfo.exportable) {
+        layerInfo.exportable.forEach(v => {
+          let scale = v.scale.split("x")[0];
+          sketch.export(layer, {
+            output: path.join(tmpPath, "dist", "assets"),
+            progressive: true,
+            "save-for-web": true,
+            scales: scale
+          });
+        })
+        data.slices.push({
+          name: layer.name,
+          objectID: layer.id,
+          rect: layerInfo.rect,
+          exportable: layerInfo.exportable
+        })
+      }
+
+
     }
     appendCss(layerInfo);
     acc.push(layerInfo)
@@ -100,15 +135,25 @@ export function generateHtml(tmpPath, currentPage, opt) {
     scale: opt.scale || "1",
     unit: opt.unit || "px",
     colorFormat: opt.colorFormat || "color-hex",
-    artboards: []
+    artboards: [],
+    slices: [],
+    colors: []
   };
+  // if(opt.exportLayer.type === "Slice")
+
   let NAME_MAP = {};
   try {
     document.pages.forEach(page => {
       if (page.id !== currentPage) return;
       let pageName = page.name;
       let pageObjectID = page.id;
-      page.layers.forEach(layer => {
+      for (let i = 0; i < page.layers.length; i++) {
+        // 仅导出slice切片范围内的artboard
+        let layer = page.layers[i];
+        if (opt.exportLayer.type === "Slice") {s
+          if(outFrame(opt.exportLayer.frame, layer.frame)) continue;
+        }
+
         if (layer.type === "Artboard" || layer.type === "Group") {
           let artboard = {
             pageName: pageName,
@@ -123,7 +168,7 @@ export function generateHtml(tmpPath, currentPage, opt) {
           }
           artboard.layers = recursiveGenerateLayer(layer.layers, {
             artboard
-          });
+          }, data, tmpPath);
           data.artboards.push(artboard);
           sketch.export(layer, {
             output: path.join(tmpPath, "dist", "preview"),
@@ -133,7 +178,7 @@ export function generateHtml(tmpPath, currentPage, opt) {
             scales: 2
           });
         }
-      })
+      }
     })
     data.artboards.forEach(artboard => {
       NAME_MAP[artboard.objectID] = artboard.slug;
@@ -143,4 +188,3 @@ export function generateHtml(tmpPath, currentPage, opt) {
     console.log(e);
   }
 }
-

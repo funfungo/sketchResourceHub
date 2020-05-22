@@ -21,10 +21,16 @@ if (!Settings.settingForKey('scale')) {
 export default function () {
   const document = require("sketch/dom").getSelectedDocument();
   const documentId = document.id;
+  console.log(documentId);
   const documentName = decodeURIComponent(
     document.path.substr(document.path.lastIndexOf("/") + 1)
   );
-  console.log(documentId);
+  let exportLayer = document.selectedPage;
+  let pageId = document.selectedPage.id;
+  if (document.selectedLayers.length === 1 && document.selectedLayers.layers[0].type === "Slice") {
+    exportLayer = document.selectedLayers.layers[0];
+    pageId = exportLayer.id;
+  }
   const dateTag = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const options = {
     parent: sketch.getSelectedDocument(),
@@ -45,7 +51,6 @@ export default function () {
   let fileHash;
   let imgAll = [];
   let previewPath;
-  let pageId = document.selectedPage.id;
 
   let previewObj = {
     documentId: documentId,
@@ -72,7 +77,7 @@ export default function () {
       previewPath = tmpPath + "/preview/";
 
       //export page preview
-      sketch.export(document.selectedPage, {
+      sketch.export(exportLayer, {
         output: previewPath,
         "save-for-web": true,
         "use-id-for-name": true,
@@ -80,6 +85,7 @@ export default function () {
         compression: 1.0,
         scales: 0.2 // preview img compress
       });
+
       let previewImg = `${previewPath}${pageId}@0.2x.jpg`;
       let url = NSURL.fileURLWithPath(previewImg),
         bitmap = NSData.alloc().initWithContentsOfURL(url),
@@ -93,6 +99,7 @@ export default function () {
       browserWindow.loadURL(webviewUrl);
     });
   } catch (err) {
+    onShutdown();
     console.error(err);
   }
 
@@ -122,7 +129,8 @@ export default function () {
       }
       let opt = {
         scale: s.scale || "1",
-        unit: s.unit || "px"
+        unit: s.unit || "px",
+        exportLayer: exportLayer
       }
       // 选中页面or全部页面
       let selected = s.page || "selected";
@@ -134,27 +142,15 @@ export default function () {
         .executeJavaScript("stage('导出缩略图...')")
         .catch(console.error);
 
-      if (selected === "selected") {
-        sketch.export(document.selectedPage, {
-          output: previewPath,
-          "save-for-web": true,
-          "use-id-for-name": true,
-          formats: picFormat,
-          compression: 0.7,
-          scales: 1
-        });
-        imgIds = [document.selectedPage.id];
-      } else {
-        sketch.export(document.pages, {
-          output: previewPath,
-          "save-for-web": true,
-          "use-id-for-name": true,
-          formats: picFormat,
-          compression: 0.7,
-          scales: 1,
-        });
-        imgIds = imgAll;
-      }
+      sketch.export(exportLayer, {
+        output: previewPath,
+        "save-for-web": true,
+        "use-id-for-name": true,
+        formats: picFormat,
+        compression: 0.7,
+        scales: 1
+      });
+      imgIds = [pageId];
       webContents
         .executeJavaScript("stage('导出中...')")
         .catch(console.error);
@@ -172,21 +168,23 @@ export default function () {
           .catch(console.error);
         util.zipSketch([zipUrl, tmpPath]).then(() => {
           let data = util.encodeBase64(zipUrl);
-          webContents
-            .executeJavaScript(
-              `callSketchUpload(${JSON.stringify({
-          documentId: documentId,
-          format: picFormat,
-          md5: fileHash,
-          taskName: taskName,
-          sketchContent: data,
-          sketchName: documentName,
-          imgIds: imgIds
-        })})`
-            )
-            .catch(err => {
-              console.error(err);
-            });
+
+        //   webContents
+        //     .executeJavaScript(
+        //       `callSketchUpload(${JSON.stringify({
+        //   documentId: documentId,
+        //   format: picFormat,
+        //   md5: fileHash,
+        //   taskName: taskName,
+        //   sketchContent: data,
+        //   sketchName: documentName,
+        //   imgIds: imgIds
+        // })})`
+        //     )
+        //     .catch(err => {
+        //       console.error(err);
+        //     });
+
         }).catch(err => {
           console.error(err);
         });

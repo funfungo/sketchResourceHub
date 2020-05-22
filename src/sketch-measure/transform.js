@@ -76,6 +76,8 @@ function transformPosition(position) {
   };
 }
 
+
+
 /**
  * Transform layer.style.borders
  * @param  {Array} borders border style list
@@ -128,7 +130,7 @@ function transformRadius(points) {
   return points[0].cornerRadius;
 }
 
-function restrictFrameMask(parentPos, frame){
+function restrictFrameMask(parentPos, frame) {
   return {
     x: frame.x < 0 ? parentPos.x : frame.x + (parentPos.x || 0),
     y: frame.y < 0 ? parentPos.y : frame.y + (parentPos.y || 0),
@@ -148,10 +150,10 @@ export function transformFrame(layer, result, parentPos) {
   let rect = {
     x: frame.x + (parentPos.x || 0),
     y: frame.y + (parentPos.y || 0),
-    width:  round(frame.width, 1),
+    width: round(frame.width, 1),
     height: round(frame.height, 1)
   };
-  if(layer.sketchObject.isMasked&&layer.sketchObject.isMasked()){
+  if (layer.sketchObject.isMasked && layer.sketchObject.isMasked()) {
     rect = restrictFrameMask(parentPos, layer.frame);
   };
   result.rect = rect;
@@ -201,4 +203,30 @@ export function transformText(layer, result) {
   // TODO 区分 fillcolor 和text color, 需要前端展示数据结构的变化
   delete textInfo.color;
   Object.assign(result, textInfo);
+}
+
+
+/**
+ * Transform exportable for slices & symbols (has export size)
+ * @param  {Object} layer  layer data
+ * @param  {Object} result result
+ * @return {Undefined}
+ */
+export function transformExportable(layer, result) {
+  const type = result.type;
+  if (
+    layer.exportFormats.length
+  ) {
+    result.exportable = layer.exportFormats.map(v => {
+      const prefix = v.prefix || "";
+      const suffix = v.suffix || "";
+      let path = v.size.split("x")[0] == 1 ? `${prefix}${layer.name}${suffix}.${v.fileFormat}` : `${prefix}${layer.name}${suffix}@${v.size}.${v.fileFormat}`;
+      return {
+        name: layer.name,
+        format: v.fileFormat,
+        scale: v.size,
+        path: path
+      };
+    });
+  }
 }
