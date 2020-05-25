@@ -23,7 +23,7 @@ import {
 const sketch = require("sketch/dom");
 const document = sketch.getSelectedDocument();
 const documentData = context.document.documentData();
-
+const generateType = ["Artboard", "Group", "SymbolMaster"];
 /**
  * detect whether a rect is out sight of range
  *
@@ -152,7 +152,7 @@ export function generateHtml(tmpPath, currentPage, opt) {
         // 仅导出slice切片范围内的artboard
         let layer = page.layers[i];
         if (opt.exportLayer.type === "Slice" && outFrame(opt.exportLayer.frame, layer.frame)) continue;
-        if (layer.type === "Artboard" || layer.type === "Group") {
+        if (generateType.indexOf(layer.type) !== -1) {
           let artboard = {
             pageName: pageName,
             pageObjectID: pageObjectID,
