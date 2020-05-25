@@ -1,6 +1,7 @@
 {
   "name": "WeCloud",
-  "version": "0.0.2",
+  "version": "0.0.3",
+  "description": "A sketch plugin that manage the design resources",
   "engines": {
     "sketch": ">=3.0"
   },
@@ -40,5 +41,9 @@
     "sketch-module-web-view": "^3.4.1",
     "webpack-glob-entry": "^2.1.1"
   },
-  "author": "nikkifang doubleluo"
+  "author": "nikkifang doubleluo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/funfungo/sketchResourceHub.git"
+  }
 }
