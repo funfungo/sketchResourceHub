@@ -3,3 +3,4 @@ node_modules
 MiaoW.sketchplugin
 WeCloud.sketchplugin
 assets/pages
+.package-lock.json
