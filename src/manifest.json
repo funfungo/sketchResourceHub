@@ -1,15 +1,7 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.5",
   "appcast": "https://raw.githubusercontent.com/funfungo/sketchResourceHub/master/.appcast.xml",
   "commands": [
-    {
-      "script" : "onAction.js",
-      "handlers" : {
-        "actions" : {
-          "OpenDocument" : "onOpenDocument"
-        }
-      }
-    },
     {
       "name": "上传 SKETCH",
       "identifier": "wecloud.my-UploadSketch-identifier",
