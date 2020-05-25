@@ -1,6 +1,6 @@
 {
   "name": "WeCloud",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A sketch plugin that manage the design resources",
   "engines": {
     "sketch": ">=3.0"
