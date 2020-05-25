@@ -1,4 +1,5 @@
 import * as fs from "@skpm/fs";
+import path from "@skpm/path";
 import BrowserWindow from "sketch-module-web-view";
 import {
   getWebview
@@ -32,6 +33,8 @@ export default function () {
     pageId = exportLayer.id;
   }
   const dateTag = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const manifest = fs.readFileSync(path.resolve("./manifest.json"));
+  const pluginVersion = JSON.parse(manifest).version;
   const options = {
     parent: sketch.getSelectedDocument(),
     // modal: true,
@@ -59,7 +62,7 @@ export default function () {
     unit: Settings.settingForKey("unit") || "px",
     md5: "",
     selected: [],
-    pluginVersion: "0.0.2",
+    pluginVersion: pluginVersion,
     pageName: document.selectedPage.name,
     all: []
   };
