@@ -35,7 +35,6 @@ sketch 启动时会查询这两个信息，判断插件是否更新来提示用�
 4. skpm 发布版本<br>
    `skpm publish v版本号`
 
-      <br>
       skpm发布会执行以下流程
       - 编译打包最新的插件
       - 更新.appcast.xml文件
