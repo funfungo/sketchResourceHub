@@ -108,10 +108,7 @@ function recursiveGenerateLayer(layers, extra, data, tmpPath) {
           rect: layerInfo.rect,
           exportable: layerInfo.exportable
         })
-        console.log(data.slices);
       }
-
-
     }
     appendCss(layerInfo);
     acc.push(layerInfo)
@@ -125,7 +122,7 @@ function recursiveGenerateLayer(layers, extra, data, tmpPath) {
       acc = acc.concat(recursiveGenerateLayer(layer.layers, {
         artboard: extra.artboard,
         parentPos: layerInfo.rect
-      }));
+      }, data, tmpPath));
     }
     return acc;
   }, [])
