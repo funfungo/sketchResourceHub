@@ -98,6 +98,7 @@ function recursiveGenerateLayer(layers, extra, data, tmpPath) {
           sketch.export(layer, {
             output: path.join(tmpPath, "dist", "assets"),
             progressive: true,
+            formats: v.format,
             "save-for-web": true,
             scales: scale
           });
