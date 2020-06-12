@@ -22,17 +22,12 @@ if (!Settings.settingForKey('scale')) {
 export default function () {
   const document = require("sketch/dom").getSelectedDocument();
   const documentId = document.id;
-  console.log(documentId);
-  const documentName = decodeURIComponent(
-    document.path.substr(document.path.lastIndexOf("/") + 1)
-  );
   let exportLayer = document.selectedPage;
   let pageId = document.selectedPage.id;
   if (document.selectedLayers.length === 1 && document.selectedLayers.layers[0].type === "Slice") {
     exportLayer = document.selectedLayers.layers[0];
     pageId = exportLayer.id;
   }
-  const dateTag = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const manifest = fs.readFileSync(path.resolve("./manifest.json"));
   const pluginVersion = JSON.parse(manifest).version;
   const options = {
@@ -52,12 +47,10 @@ export default function () {
   };
   const browserWindow = new BrowserWindow(options);
   let fileHash;
-  let imgAll = [];
   let previewPath;
 
   let previewObj = {
     documentId: documentId,
-    documentName: documentName,
     scale: Settings.settingForKey("scale") || 1,
     unit: Settings.settingForKey("unit") || "px",
     md5: "",
@@ -66,8 +59,8 @@ export default function () {
     pageName: document.selectedPage.name,
     all: []
   };
+
   try {
-    //先保存文件
     document.save(err => {
       fileHash = String(
         NSFileManager.defaultManager()
@@ -100,6 +93,8 @@ export default function () {
       previewObj.selected.push(img);
       let webviewUrl = process.env.NODE_ENV === "development" ? "http://localhost:8081/UploadSketch" : "http://cloud.wedesign.oa.com/uploadSketch"
       browserWindow.loadURL(webviewUrl);
+
+
     });
   } catch (err) {
     onShutdown();
@@ -124,7 +119,6 @@ export default function () {
   })
   webContents.on("sketchUpload", s => {
     try {
-      // 交互or视觉
       let type = s.type || 1; //1：交互 2：视觉
       if (s.scale && s.unit) {
         console.log("save config");
@@ -138,13 +132,12 @@ export default function () {
       // 选中页面or全部页面
       let selected = s.page || "selected";
       let taskName = s.taskName; // sketch file与task同名;
-      // let taskName = documentName.split(".")[0];
-      let sketchFileUrl = `${tmpPath}/${documentName}`;
       let imgIds;
+      let sketchFileUrl = `${tmpPath}/${taskName}.sketch`;
+
       webContents
         .executeJavaScript("stage('导出缩略图...')")
         .catch(console.error);
-
       sketch.export(exportLayer, {
         output: previewPath,
         "save-for-web": true,
@@ -157,40 +150,53 @@ export default function () {
       webContents
         .executeJavaScript("stage('导出中...')")
         .catch(console.error);
-      console.time("time");
+
       util.saveSketchFile([decodeURIComponent(document.path), sketchFileUrl]).then(() => {
-        console.timeEnd("time");
-        if (type == 2) {
-          console.time("generate");
-          generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "", opt);
-          //todo generate symbol icons
-          console.timeEnd("generate");
-        }
-        webContents
-          .executeJavaScript("stage('打包中...')")
-          .catch(console.error);
-        util.zipSketch([zipUrl, tmpPath]).then(() => {
-          let data = util.encodeBase64(zipUrl);
-          webContents
-            .executeJavaScript(
-              `callSketchUpload(${JSON.stringify({
-          documentId: documentId,
-          format: picFormat,
-          md5: fileHash,
-          taskName: taskName,
-          sketchContent: data,
-          sketchName: documentName,
-          imgIds: imgIds
-        })})`
-            )
-            .catch(err => {
+        // 处理sketch,保留所需page
+        Document.open(sketchFileUrl, (err, newDocument) => {
+          newDocument.pages = newDocument.pages.filter((page) => {
+            return page.id === document.selectedPage.id || page.isSymbolsPage();
+          })
+          newDocument.save(err => {
+            //导出标注
+            if (type == 2) {
+              console.time("generate");
+              generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "", opt);
+              //todo generate symbol icons
+              console.timeEnd("generate");
+            }
+            //流程通知
+            webContents
+              .executeJavaScript("stage('打包中...')")
+              .catch(console.error);
+            //打包上传
+            util.zipSketch([zipUrl, tmpPath]).then(() => {
+              let data = util.encodeBase64(zipUrl);
+              //如果不读取一下文件的话会上传为分割版本的sketch
+              //原因不明
+              let fileData = fs.readFileSync(sketchFileUrl);
+              webContents
+                .executeJavaScript(
+                  `callSketchUpload(${JSON.stringify({
+                  documentId: documentId,
+                  format: picFormat,
+                  md5: fileHash,
+                  taskName: taskName,
+                  sketchContent: data,
+                  sketchName: `${taskName}.sketch`,
+                  imgIds: imgIds
+                })})`
+                )
+                .catch(err => {
+                  console.error(err);
+                });
+              newDocument.close();
+            }).catch(err => {
               console.error(err);
             });
-
-        }).catch(err => {
-          console.error(err);
-        });
-      })
+          });
+        })
+      }).catch(err => console.log(err));
     } catch (err) {
       webContents
         .executeJavaScript("emitError('出错啦...')")
