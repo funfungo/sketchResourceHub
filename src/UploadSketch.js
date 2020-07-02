@@ -93,8 +93,6 @@ export default function () {
       previewObj.selected.push(img);
       let webviewUrl = process.env.NODE_ENV === "development" ? "http://localhost:8081/UploadSketch" : "http://cloud.wedesign.oa.com/uploadSketch"
       browserWindow.loadURL(webviewUrl);
-
-
     });
   } catch (err) {
     onShutdown();
@@ -157,12 +155,10 @@ export default function () {
           newDocument.pages = newDocument.pages.filter((page) => {
             return page.id === document.selectedPage.id || page.isSymbolsPage();
           })
-          newDocument.save(err => {
+          newDocument.save(sketchFileUrl, err => {
             //导出标注
             if (type == 2) {
-              console.time("generate");
               generateHtml(tmpPath + "/html", selected === "selected" ? document.selectedPage.id : "", opt);
-              //todo generate symbol icons
               console.timeEnd("generate");
             }
             //流程通知
@@ -172,9 +168,6 @@ export default function () {
             //打包上传
             util.zipSketch([zipUrl, tmpPath]).then(() => {
               let data = util.encodeBase64(zipUrl);
-              //如果不读取一下文件的话会上传为分割版本的sketch
-              //原因不明
-              let fileData = fs.readFileSync(sketchFileUrl);
               webContents
                 .executeJavaScript(
                   `callSketchUpload(${JSON.stringify({
