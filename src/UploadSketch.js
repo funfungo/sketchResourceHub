@@ -10,45 +10,77 @@ import {
   generateHtml
 } from "./GenerateHtml";
 
+
+
 const webviewIdentifier = "wecloud.webview";
+const browserOptions = {
+  parent: sketch.getSelectedDocument(),
+  identifier: webviewIdentifier,
+  width: 320,
+  height: 785,
+  show: false,
+  remembersWindowFrame: true,
+  movable: true,
+  alwaysOnTop: true,
+  minimizable: false,
+  maximizable: false
+};
 const Document = require("sketch/dom").Document;
-const Settings = require('sketch/settings')
+const Settings = require('sketch/settings');
+const Slice = sketch.Slice;
 const picFormat = "jpg";
 let tmpPath, zipUrl;
+let config = {
+  picFormat: "jpg", //统一导出压缩jpg，避免图片过大
+}
+
 if (!Settings.settingForKey('scale')) {
   Settings.setSettingForKey('scale', 1)
   Settings.setSettingForKey('unit', "px")
 }
+
 export default function () {
   const document = require("sketch/dom").getSelectedDocument();
   const documentId = document.id;
   let exportLayer = document.selectedPage;
-  let pageId = document.selectedPage.id;
+  let pageId;
+  //选中slice图层时按设计师设置的导出选项
   if (document.selectedLayers.length === 1 && document.selectedLayers.layers[0].type === "Slice") {
     exportLayer = document.selectedLayers.layers[0];
+    //slice图层未设置背景色或背景色为白色时处理背景颜色
+    if (exportLayer.sketchObject.hasBackgroundColor() !== 1 || getWhiteMsColor(exportLayer.sketchObject.backgroundColor())) {
+      exportLayer.sketchObject.hasBackgroundColor = true;
+      if (NSUserDefaults.standardUserDefaults().stringForKey("AppleInterfaceStyle") == "Dark") {
+        exportLayer.sketchObject.backgroundColor = getMsColor(0.07, 0.07, 0.07, 1);
+      }else{
+        exportLayer.sketchObject.backgroundColor = getMsColor(0.95, 0.95, 0.95, 1);
+      }
+    }
     pageId = exportLayer.id;
+  } else {
+    //未选中slice图层时
+    //需主动生成一个slice图层，设置背景色
+    //以保证导出的jpg背景色不是白色，避免和画布背景色融合导致体验不佳
+    let exportSlice = new Slice();
+    exportSlice.frame = getPageRange(exportLayer.layers);
+    exportSlice.sketchObject.hasBackgroundColor = true;
+    if (NSUserDefaults.standardUserDefaults().stringForKey("AppleInterfaceStyle") == "Dark") {
+      exportSlice.sketchObject.backgroundColor = getMsColor(0.07, 0.07, 0.07, 1);
+    }else{
+      exportSlice.sketchObject.backgroundColor = getMsColor(0.95, 0.95, 0.95, 1);
+
+    }
+    exportSlice.parent = exportLayer;
+    pageId = exportSlice.id;
+    exportLayer = exportSlice;
   }
+
+  //获取插件配置信息，以提示版本更新
   const manifest = fs.readFileSync(path.resolve("./manifest.json"));
   const pluginVersion = JSON.parse(manifest).version;
-  const options = {
-    parent: sketch.getSelectedDocument(),
-    // modal: true,
-    identifier: webviewIdentifier,
-    width: 320,
-    height: 785,
-    show: false,
-    // frame: false,
-    // titleBarStyle: "hidden",
-    remembersWindowFrame: true,
-    movable: true,
-    alwaysOnTop: true,
-    minimizable: false,
-    maximizable: false
-  };
-  const browserWindow = new BrowserWindow(options);
+  const browserWindow = new BrowserWindow(browserOptions);
   let fileHash;
   let previewPath;
-
   let previewObj = {
     documentId: documentId,
     scale: Settings.settingForKey("scale") || 1,
@@ -59,7 +91,6 @@ export default function () {
     pageName: document.selectedPage.name,
     all: []
   };
-
   try {
     document.save(err => {
       fileHash = String(
@@ -71,7 +102,6 @@ export default function () {
       previewObj.md5 = fileHash;
       zipUrl = tmpPath + ".zip";
       previewPath = tmpPath + "/preview/";
-
       //export page preview
       sketch.export(exportLayer, {
         output: previewPath,
@@ -82,7 +112,7 @@ export default function () {
         scales: 0.2 // preview img compress
       });
 
-      let previewImg = `${previewPath}${pageId}@0.2x.jpg`;
+      let previewImg = `${previewPath}${pageId}@0.2x.${picFormat}`;
       let url = NSURL.fileURLWithPath(previewImg),
         bitmap = NSData.alloc().initWithContentsOfURL(url),
         base64 = bitmap.base64EncodedStringWithOptions(0) + "";
@@ -106,6 +136,7 @@ export default function () {
   browserWindow.once("closed", () => {
     NSFileManager.defaultManager().removeItemAtPath_error(tmpPath, nil);
     NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
+    exportLayer.parent = null;
   })
 
   const webContents = browserWindow.webContents;
@@ -207,12 +238,54 @@ export default function () {
     NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
     browserWindow.close();
   });
-}
 
+
+}
 
 function saveConfig(scale, unit) {
   Settings.setSettingForKey('scale', scale);
   Settings.setSettingForKey('unit', unit);
+}
+
+function getMsColor(r, g, b, a) {
+  let color = MSColor.alloc().init();
+  color.red = r;
+  color.green = g;
+  color.blue = b;
+  color.alpha = a;
+  return color;
+}
+
+function getPageRange(layers) {
+  let x = 0;
+  let y = 0;
+  let padding = 100;
+  let frame = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0
+  }
+  layers.forEach(layer => {
+    let layerFrame = layer.frame;
+    frame.x = frame.x === 0 ? layerFrame.x : Math.min(frame.x, layerFrame.x);
+    frame.y = frame.y === 0 ? layerFrame.y : Math.min(frame.y, layerFrame.y);
+    frame.width = Math.max(frame.width, layerFrame.x + layerFrame.width);
+    frame.height = Math.max(frame.height, layerFrame.y + layerFrame.height);
+  })
+  frame.x = frame.x - padding;
+  frame.y = frame.y - padding;
+  frame.width = frame.width - frame.x + padding;
+  frame.height = frame.height - frame.y + padding;
+  return frame;
+}
+/**
+ * 判断一个MSColor是否为白色
+ * @param {MSColor} mscolor
+ */
+function getWhiteMsColor(mscolor) {
+  let RGBADictionary = mscolor.RGBADictionary();
+  return String(RGBADictionary.r) === "1" && String(RGBADictionary.b) === "1" && String(RGBADictionary.g) === "1";
 }
 
 export function onShutdown() {
