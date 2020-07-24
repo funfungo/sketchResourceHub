@@ -44,6 +44,7 @@ export default function () {
   const documentId = document.id;
   let exportLayer = document.selectedPage;
   let pageId;
+  let exportSlice = new Slice();
   //选中slice图层时按设计师设置的导出选项
   if (document.selectedLayers.length === 1 && document.selectedLayers.layers[0].type === "Slice") {
     exportLayer = document.selectedLayers.layers[0];
@@ -61,7 +62,6 @@ export default function () {
     //未选中slice图层时
     //需主动生成一个slice图层，设置背景色
     //以保证导出的jpg背景色不是白色，避免和画布背景色融合导致体验不佳
-    let exportSlice = new Slice();
     exportSlice.frame = getPageRange(exportLayer.layers);
     exportSlice.sketchObject.hasBackgroundColor = true;
     if (NSUserDefaults.standardUserDefaults().stringForKey("AppleInterfaceStyle") == "Dark") {
@@ -136,7 +136,7 @@ export default function () {
   browserWindow.once("closed", () => {
     NSFileManager.defaultManager().removeItemAtPath_error(tmpPath, nil);
     NSFileManager.defaultManager().removeItemAtPath_error(zipUrl, nil);
-    exportLayer.parent = null;
+    exportSlice.parent = null;
   })
 
   const webContents = browserWindow.webContents;
