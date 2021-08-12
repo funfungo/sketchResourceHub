@@ -44,29 +44,6 @@
 
 ### 0.0.5 添加导出slice及切图能力，发布插件及自动更新能力
 
------------
-### 插件自动更新机制
-
-在插件的描述文件 manifest.json 中定义了插件的版本
-`"version": "0.0.5",`
-及插件版本更新信息的线上地址
-`"appcast": "https://raw.githubusercontent.com/funfungo/sketchResourceHub/master/.appcast.xml"`
-
-sketch 启动时会查询这两个信息，判断插件是否更新来提示用户更新<br>
-因此，更新插件版本时，需要更新 manifest.json 中的 version 信息，及.appcast.xml 中的版本信息
-
------
-### 插件自动发布流程
-因为公司要求发布到github上的代码走开源流程，因此仅使用github托管插件压缩包及更新文件。
-
-在master分支上打tag会自动触发orange-ci的构建流程自动发布插件到github进行托管，并更新仓库文件的版本号。
-```
-git tag v1.0.0
-git push origin v1.0.0
-```
-托管插件仓库地址
-github: https://github.com/funfungo/sketchResourceHub
-
 
 
 
