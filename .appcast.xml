@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.1.8/WeCloud.sketchplugin.zip" sparkle:version="0.1.8"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.1.7/WeCloud.sketchplugin.zip" sparkle:version="0.1.7"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.1.6/WeCloud.sketchplugin.zip" sparkle:version="0.1.6"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.1.5/WeCloud.sketchplugin.zip" sparkle:version="0.1.5"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.1.3/WeCloud.sketchplugin.zip" sparkle:version="0.1.3"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.1.2/WeCloud.sketchplugin.zip" sparkle:version="0.1.2"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.1.1/WeCloud.sketchplugin.zip" sparkle:version="0.1.1"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.1.0/WeCloud.sketchplugin.zip" sparkle:version="0.1.0"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.0.11/WeCloud.sketchplugin.zip" sparkle:version="0.0.11"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.0.10/WeCloud.sketchplugin.zip" sparkle:version="0.0.10"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.0.9/WeCloud.sketchplugin.zip" sparkle:version="0.0.9"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.0.8/WeCloud.sketchplugin.zip" sparkle:version="0.0.8"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.0.7/WeCloud.sketchplugin.zip" sparkle:version="0.0.7"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.0.6/WeCloud.sketchplugin.zip" sparkle:version="0.0.6"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.0.5/WeCloud.sketchplugin.zip" sparkle:version="0.0.5"/>
+    </item>
+    <item>
+      <enclosure url="https://github.com/funfungo/sketchResourceHub/releases/download/v0.0.4/WeCloud.sketchplugin.zip" sparkle:version="0.0.4"/>
+    </item>
+  </channel>
+</rss>

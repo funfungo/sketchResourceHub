@@ -1,0 +1,6 @@
+node_modules
+.DS_Store
+MiaoW.sketchplugin
+WeCloud.sketchplugin
+assets/pages
+.package-lock.json
